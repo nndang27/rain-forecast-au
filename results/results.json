@@ -1,0 +1,1127 @@
+{
+ "data": {
+  "rows": 275410,
+  "locations": 49,
+  "first_date": "2007-11-01",
+  "last_date": "2026-01-30",
+  "rows_2016": 1265,
+  "missing_pct": {
+   "Sunshine": 62.1,
+   "Evaporation": 58.1,
+   "Cloud3pm": 48.2,
+   "Cloud9am": 45.9,
+   "Pressure9am": 11.0,
+   "Pressure3pm": 11.0,
+   "WindDir9am": 7.8,
+   "WindGustDir": 7.4
+  },
+  "raintomorrow_yes": 0.214,
+  "stations_no_sunshine": 19,
+  "rows_honest": 266609,
+  "positive_share_honest": 0.22024387773856097
+ },
+ "leak": {
+  "riskmm_equals_next_rain": 1.0,
+  "target_equals_riskmm_gt1": 1.0
+ },
+ "split_counts": {
+  "rows": {
+   "train": 166216,
+   "val": 33182,
+   "test": 67211
+  },
+  "rain_share": {
+   "train": 0.2144,
+   "val": 0.2365,
+   "test": 0.2265
+  }
+ },
+ "lgb_importance_top10": {
+  "Location": 0.188,
+  "Humidity3pm": 0.16,
+  "Pressure3pm": 0.093,
+  "PressureChange": 0.065,
+  "Rainfall": 0.051,
+  "WindDir3pm_cos": 0.051,
+  "month_cos": 0.04,
+  "Pressure9am": 0.028,
+  "Cloud3pm": 0.028,
+  "MinTemp": 0.025
+ },
+ "mlp_params": 13841,
+ "transformer_params": 20113,
+ "attention_from_day_t": {
+  "all": [
+   0.1396999955177307,
+   0.1404000073671341,
+   0.1387999951839447,
+   0.15039999783039093,
+   0.13670000433921814,
+   0.15299999713897705,
+   0.14100000262260437
+  ],
+  "rain": [
+   0.1454000025987625,
+   0.1420000046491623,
+   0.14059999585151672,
+   0.15129999816417694,
+   0.13379999995231628,
+   0.14959999918937683,
+   0.13740000128746033
+  ],
+  "dry": [
+   0.13809999823570251,
+   0.13989999890327454,
+   0.13819999992847443,
+   0.1501999944448471,
+   0.13760000467300415,
+   0.15389999747276306,
+   0.1421000063419342
+  ]
+ },
+ "thresholds": {
+  "LogReg": 0.2,
+  "LightGBM": 0.23,
+  "MLP": 0.23,
+  "GRU": 0.24,
+  "Transformer": 0.23
+ },
+ "main_test": [
+  {
+   "model": "Always no rain",
+   "log_loss": NaN,
+   "brier": NaN,
+   "roc_auc": NaN,
+   "pr_auc": NaN,
+   "threshold": NaN,
+   "accuracy": 0.7735,
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0,
+   "cost_per_day": 0.6796
+  },
+  {
+   "model": "Persistence (rain today)",
+   "log_loss": NaN,
+   "brier": NaN,
+   "roc_auc": NaN,
+   "pr_auc": NaN,
+   "threshold": NaN,
+   "accuracy": 0.7059,
+   "precision": 0.3491,
+   "recall": 0.3451,
+   "f1": 0.3471,
+   "cost_per_day": 0.5908
+  },
+  {
+   "model": "Climatology (station x month)",
+   "log_loss": 0.4999,
+   "brier": 0.163,
+   "roc_auc": 0.6774,
+   "pr_auc": 0.3736,
+   "threshold": 0.21,
+   "accuracy": 0.6077,
+   "precision": 0.323,
+   "recall": 0.6674,
+   "f1": 0.4353,
+   "cost_per_day": 0.543
+  },
+  {
+   "model": "Humidity3pm > 60",
+   "log_loss": NaN,
+   "brier": NaN,
+   "roc_auc": NaN,
+   "pr_auc": NaN,
+   "threshold": NaN,
+   "accuracy": 0.6633,
+   "precision": 0.3429,
+   "recall": 0.5309,
+   "f1": 0.4167,
+   "cost_per_day": 0.5493
+  },
+  {
+   "model": "LogReg",
+   "log_loss": 0.4812,
+   "brier": 0.1568,
+   "roc_auc": 0.7187,
+   "pr_auc": 0.4202,
+   "threshold": 0.2,
+   "accuracy": 0.6324,
+   "precision": 0.3474,
+   "recall": 0.7088,
+   "f1": 0.4663,
+   "cost_per_day": 0.4995
+  },
+  {
+   "model": "LightGBM",
+   "log_loss": 0.447,
+   "brier": 0.1447,
+   "roc_auc": 0.7728,
+   "pr_auc": 0.5053,
+   "threshold": 0.23,
+   "accuracy": 0.7056,
+   "precision": 0.41,
+   "recall": 0.6822,
+   "f1": 0.5121,
+   "cost_per_day": 0.4384
+  },
+  {
+   "model": "MLP",
+   "log_loss": 0.4453,
+   "brier": 0.1442,
+   "roc_auc": 0.7752,
+   "pr_auc": 0.5064,
+   "threshold": 0.23,
+   "accuracy": 0.6897,
+   "precision": 0.3983,
+   "recall": 0.7239,
+   "f1": 0.5138,
+   "cost_per_day": 0.4354
+  },
+  {
+   "model": "GRU",
+   "log_loss": 0.4562,
+   "brier": 0.1478,
+   "roc_auc": 0.7588,
+   "pr_auc": 0.4833,
+   "threshold": 0.24,
+   "accuracy": 0.6877,
+   "precision": 0.3921,
+   "recall": 0.6874,
+   "f1": 0.4994,
+   "cost_per_day": 0.4539
+  },
+  {
+   "model": "Transformer",
+   "log_loss": 0.4542,
+   "brier": 0.1471,
+   "roc_auc": 0.7642,
+   "pr_auc": 0.489,
+   "threshold": 0.23,
+   "accuracy": 0.6925,
+   "precision": 0.3979,
+   "recall": 0.6963,
+   "f1": 0.5064,
+   "cost_per_day": 0.4451
+  },
+  {
+   "model": "LightGBM (default 0.5)",
+   "log_loss": 0.447,
+   "brier": 0.1447,
+   "roc_auc": 0.7728,
+   "pr_auc": 0.5053,
+   "threshold": 0.5,
+   "accuracy": 0.7949,
+   "precision": 0.6346,
+   "recall": 0.2233,
+   "f1": 0.3304,
+   "cost_per_day": 0.557
+  }
+ ],
+ "seed_var": {
+  "MLP": {
+   "log_loss": [
+    0.44605672234886146,
+    0.0008649093113838343
+   ],
+   "pr_auc": [
+    0.5064656160578153,
+    0.0019817324339691245
+   ],
+   "recall": [
+    0.7211567932046061,
+    0.009909269561650783
+   ],
+   "f1": [
+    0.5132800224066275,
+    0.0016426854290155517
+   ],
+   "cost_per_day": [
+    0.43619348023389026,
+    0.0018514041130531828
+   ]
+  },
+  "GRU": {
+   "log_loss": [
+    0.45533473546716285,
+    0.0014030264352448963
+   ],
+   "pr_auc": [
+    0.4861284191888555,
+    0.0037904680345692775
+   ],
+   "recall": [
+    0.6833705503743598,
+    0.005486694429510207
+   ],
+   "f1": [
+    0.501882587685239,
+    0.0021902569784524916
+   ],
+   "cost_per_day": [
+    0.4507744268051361,
+    0.0026967081023823443
+   ]
+  },
+  "Transformer": {
+   "log_loss": [
+    0.45308857491732185,
+    0.0010564026115743657
+   ],
+   "pr_auc": [
+    0.4920302080160899,
+    0.00314471420965039
+   ],
+   "recall": [
+    0.7096851876176715,
+    0.01399251755955067
+   ],
+   "f1": [
+    0.5049706666273549,
+    0.0029489000752622625
+   ],
+   "cost_per_day": [
+    0.44680682229595353,
+    0.0036659570692704527
+   ]
+  }
+ },
+ "task_gap": [
+  {
+   "task": "This project (9am t+1 \u2192 9am t+2, time-safe inputs)",
+   "pr_auc": 0.5053,
+   "roc_auc": 0.7728,
+   "recall": 0.6822,
+   "precision": 0.41,
+   "f1": 0.5121,
+   "accuracy": 0.7056
+  },
+  {
+   "task": "Standard Kaggle task (RainTomorrow, all columns of day t)",
+   "pr_auc": 0.7728,
+   "roc_auc": 0.9036,
+   "recall": 0.7779,
+   "precision": 0.6066,
+   "f1": 0.6816,
+   "accuracy": 0.8355
+  },
+  {
+   "task": "Standard task + RISK_MM",
+   "pr_auc": 1.0,
+   "roc_auc": 1.0,
+   "recall": 1.0,
+   "precision": 1.0,
+   "f1": 1.0,
+   "accuracy": 1.0
+  }
+ ],
+ "random_vs_time": {
+  "random_split_pr_auc": 0.5162214151531282,
+  "time_split_pr_auc": 0.5052639940031521
+ },
+ "rolling": {
+  "per_year": [
+   {
+    "model": "LogReg",
+    "year": 2020,
+    "pr_auc": 0.4013,
+    "recall": 0.7052,
+    "f1": 0.4581,
+    "cost_per_day": 0.5185,
+    "rain_share": 0.2297
+   },
+   {
+    "model": "LightGBM",
+    "year": 2020,
+    "pr_auc": 0.4863,
+    "recall": 0.6672,
+    "f1": 0.5021,
+    "cost_per_day": 0.4567,
+    "rain_share": 0.2297
+   },
+   {
+    "model": "LogReg",
+    "year": 2021,
+    "pr_auc": 0.4467,
+    "recall": 0.7324,
+    "f1": 0.4926,
+    "cost_per_day": 0.4982,
+    "rain_share": 0.2437
+   },
+   {
+    "model": "LightGBM",
+    "year": 2021,
+    "pr_auc": 0.5388,
+    "recall": 0.7114,
+    "f1": 0.5394,
+    "cost_per_day": 0.4368,
+    "rain_share": 0.2437
+   },
+   {
+    "model": "LogReg",
+    "year": 2022,
+    "pr_auc": 0.4977,
+    "recall": 0.7477,
+    "f1": 0.5186,
+    "cost_per_day": 0.5235,
+    "rain_share": 0.2766
+   },
+   {
+    "model": "LightGBM",
+    "year": 2022,
+    "pr_auc": 0.5833,
+    "recall": 0.7398,
+    "f1": 0.5688,
+    "cost_per_day": 0.4542,
+    "rain_share": 0.2766
+   },
+   {
+    "model": "LogReg",
+    "year": 2023,
+    "pr_auc": 0.3806,
+    "recall": 0.7167,
+    "f1": 0.4439,
+    "cost_per_day": 0.4931,
+    "rain_share": 0.2087
+   },
+   {
+    "model": "LightGBM",
+    "year": 2023,
+    "pr_auc": 0.4581,
+    "recall": 0.6707,
+    "f1": 0.4842,
+    "cost_per_day": 0.4358,
+    "rain_share": 0.2087
+   },
+   {
+    "model": "LogReg",
+    "year": 2024,
+    "pr_auc": 0.3808,
+    "recall": 0.7167,
+    "f1": 0.4424,
+    "cost_per_day": 0.4939,
+    "rain_share": 0.2081
+   },
+   {
+    "model": "LightGBM",
+    "year": 2024,
+    "pr_auc": 0.4782,
+    "recall": 0.7051,
+    "f1": 0.4929,
+    "cost_per_day": 0.4247,
+    "rain_share": 0.2081
+   },
+   {
+    "model": "LogReg",
+    "year": 2025,
+    "pr_auc": 0.4026,
+    "recall": 0.7206,
+    "f1": 0.4569,
+    "cost_per_day": 0.4989,
+    "rain_share": 0.2196
+   },
+   {
+    "model": "LightGBM",
+    "year": 2025,
+    "pr_auc": 0.505,
+    "recall": 0.705,
+    "f1": 0.5091,
+    "cost_per_day": 0.4282,
+    "rain_share": 0.2196
+   }
+  ],
+  "summary": {
+   "LightGBM": {
+    "pr_auc": [
+     0.508,
+     0.046
+    ],
+    "recall": [
+     0.7,
+     0.027
+    ],
+    "f1": [
+     0.516,
+     0.032
+    ],
+    "cost_per_day": [
+     0.439,
+     0.013
+    ]
+   },
+   "LogReg": {
+    "pr_auc": [
+     0.418,
+     0.046
+    ],
+    "recall": [
+     0.723,
+     0.015
+    ],
+    "f1": [
+     0.469,
+     0.03
+    ],
+    "cost_per_day": [
+     0.504,
+     0.013
+    ]
+   }
+  }
+ },
+ "unseen_stations": {
+  "unseen_pr_auc": [
+   0.43525634706173444,
+   0.05573056553639444
+  ],
+  "seen_pr_auc": [
+   0.46548123251081364,
+   0.012030854185119729
+  ],
+  "unseen_recall": [
+   0.6573272876939,
+   0.0379721909946739
+  ]
+ },
+ "per_location": [
+  {
+   "Location": "Woomera",
+   "rain_share": 0.065,
+   "pr_auc": 0.199,
+   "recall": 0.137,
+   "precision": 0.351,
+   "days": 1458.0
+  },
+  {
+   "Location": "SalmonGums",
+   "rain_share": 0.127,
+   "pr_auc": 0.242,
+   "recall": 0.351,
+   "precision": 0.264,
+   "days": 1478.0
+  },
+  {
+   "Location": "Mildura",
+   "rain_share": 0.109,
+   "pr_auc": 0.259,
+   "recall": 0.325,
+   "precision": 0.352,
+   "days": 1447.0
+  },
+  {
+   "Location": "Uluru",
+   "rain_share": 0.085,
+   "pr_auc": 0.26,
+   "recall": 0.317,
+   "precision": 0.305,
+   "days": 1478.0
+  },
+  {
+   "Location": "Sale",
+   "rain_share": 0.207,
+   "pr_auc": 0.269,
+   "recall": 0.128,
+   "precision": 0.271,
+   "days": 1468.0
+  },
+  {
+   "Location": "Cobar",
+   "rain_share": 0.129,
+   "pr_auc": 0.294,
+   "recall": 0.277,
+   "precision": 0.28,
+   "days": 1484.0
+  },
+  {
+   "Location": "AliceSprings",
+   "rain_share": 0.076,
+   "pr_auc": 0.311,
+   "recall": 0.339,
+   "precision": 0.317,
+   "days": 1466.0
+  },
+  {
+   "Location": "Canberra",
+   "rain_share": 0.186,
+   "pr_auc": 0.315,
+   "recall": 0.545,
+   "precision": 0.34,
+   "days": 1488.0
+  },
+  {
+   "Location": "Hobart",
+   "rain_share": 0.208,
+   "pr_auc": 0.319,
+   "recall": 0.577,
+   "precision": 0.296,
+   "days": 1487.0
+  },
+  {
+   "Location": "Moree",
+   "rain_share": 0.149,
+   "pr_auc": 0.322,
+   "recall": 0.377,
+   "precision": 0.309,
+   "days": 1442.0
+  },
+  {
+   "Location": "Launceston",
+   "rain_share": 0.22,
+   "pr_auc": 0.324,
+   "recall": 0.494,
+   "precision": 0.345,
+   "days": 1480.0
+  },
+  {
+   "Location": "Tuggeranong",
+   "rain_share": 0.187,
+   "pr_auc": 0.337,
+   "recall": 0.56,
+   "precision": 0.327,
+   "days": 1481.0
+  },
+  {
+   "Location": "Nhil",
+   "rain_share": 0.16,
+   "pr_auc": 0.396,
+   "recall": 0.522,
+   "precision": 0.369,
+   "days": 1435.0
+  },
+  {
+   "Location": "Bendigo",
+   "rain_share": 0.172,
+   "pr_auc": 0.399,
+   "recall": 0.575,
+   "precision": 0.342,
+   "days": 1461.0
+  },
+  {
+   "Location": "MelbourneAirport",
+   "rain_share": 0.211,
+   "pr_auc": 0.405,
+   "recall": 0.65,
+   "precision": 0.349,
+   "days": 1485.0
+  },
+  {
+   "Location": "WaggaWagga",
+   "rain_share": 0.186,
+   "pr_auc": 0.406,
+   "recall": 0.564,
+   "precision": 0.371,
+   "days": 1477.0
+  },
+  {
+   "Location": "BadgerysCreek",
+   "rain_share": 0.225,
+   "pr_auc": 0.407,
+   "recall": 0.524,
+   "precision": 0.371,
+   "days": 1380.0
+  },
+  {
+   "Location": "Penrith",
+   "rain_share": 0.222,
+   "pr_auc": 0.407,
+   "recall": 0.601,
+   "precision": 0.366,
+   "days": 1469.0
+  },
+  {
+   "Location": "Albury",
+   "rain_share": 0.2,
+   "pr_auc": 0.408,
+   "recall": 0.617,
+   "precision": 0.361,
+   "days": 1478.0
+  },
+  {
+   "Location": "Richmond",
+   "rain_share": 0.229,
+   "pr_auc": 0.421,
+   "recall": 0.643,
+   "precision": 0.364,
+   "days": 1408.0
+  },
+  {
+   "Location": "Wollongong",
+   "rain_share": 0.271,
+   "pr_auc": 0.436,
+   "recall": 0.644,
+   "precision": 0.379,
+   "days": 1438.0
+  },
+  {
+   "Location": "Brisbane",
+   "rain_share": 0.245,
+   "pr_auc": 0.437,
+   "recall": 0.733,
+   "precision": 0.37,
+   "days": 1483.0
+  },
+  {
+   "Location": "Williamtown",
+   "rain_share": 0.289,
+   "pr_auc": 0.449,
+   "recall": 0.714,
+   "precision": 0.4,
+   "days": 1465.0
+  },
+  {
+   "Location": "Melbourne",
+   "rain_share": 0.246,
+   "pr_auc": 0.468,
+   "recall": 0.722,
+   "precision": 0.402,
+   "days": 1489.0
+  },
+  {
+   "Location": "GoldCoast",
+   "rain_share": 0.281,
+   "pr_auc": 0.47,
+   "recall": 0.757,
+   "precision": 0.389,
+   "days": 1450.0
+  },
+  {
+   "Location": "MountGinini",
+   "rain_share": 0.298,
+   "pr_auc": 0.47,
+   "recall": 0.717,
+   "precision": 0.392,
+   "days": 1479.0
+  },
+  {
+   "Location": "Watsonia",
+   "rain_share": 0.253,
+   "pr_auc": 0.472,
+   "recall": 0.715,
+   "precision": 0.397,
+   "days": 1471.0
+  },
+  {
+   "Location": "NorahHead",
+   "rain_share": 0.312,
+   "pr_auc": 0.476,
+   "recall": 0.731,
+   "precision": 0.393,
+   "days": 1454.0
+  },
+  {
+   "Location": "NorfolkIsland",
+   "rain_share": 0.302,
+   "pr_auc": 0.476,
+   "recall": 0.861,
+   "precision": 0.393,
+   "days": 1478.0
+  },
+  {
+   "Location": "SydneyAirport",
+   "rain_share": 0.288,
+   "pr_auc": 0.482,
+   "recall": 0.712,
+   "precision": 0.386,
+   "days": 1473.0
+  },
+  {
+   "Location": "Sydney",
+   "rain_share": 0.304,
+   "pr_auc": 0.487,
+   "recall": 0.758,
+   "precision": 0.388,
+   "days": 1481.0
+  },
+  {
+   "Location": "Ballarat",
+   "rain_share": 0.251,
+   "pr_auc": 0.507,
+   "recall": 0.741,
+   "precision": 0.424,
+   "days": 1476.0
+  },
+  {
+   "Location": "Nuriootpa",
+   "rain_share": 0.196,
+   "pr_auc": 0.522,
+   "recall": 0.662,
+   "precision": 0.434,
+   "days": 1405.0
+  },
+  {
+   "Location": "Townsville",
+   "rain_share": 0.197,
+   "pr_auc": 0.535,
+   "recall": 0.727,
+   "precision": 0.434,
+   "days": 1469.0
+  },
+  {
+   "Location": "CoffsHarbour",
+   "rain_share": 0.336,
+   "pr_auc": 0.551,
+   "recall": 0.799,
+   "precision": 0.44,
+   "days": 1465.0
+  },
+  {
+   "Location": "Cairns",
+   "rain_share": 0.327,
+   "pr_auc": 0.596,
+   "recall": 0.847,
+   "precision": 0.436,
+   "days": 1462.0
+  },
+  {
+   "Location": "PerthAirport",
+   "rain_share": 0.189,
+   "pr_auc": 0.597,
+   "recall": 0.773,
+   "precision": 0.514,
+   "days": 1489.0
+  },
+  {
+   "Location": "PearceRAAF",
+   "rain_share": 0.18,
+   "pr_auc": 0.599,
+   "recall": 0.729,
+   "precision": 0.489,
+   "days": 1476.0
+  },
+  {
+   "Location": "Perth",
+   "rain_share": 0.198,
+   "pr_auc": 0.601,
+   "recall": 0.741,
+   "precision": 0.504,
+   "days": 1466.0
+  },
+  {
+   "Location": "Albany",
+   "rain_share": 0.29,
+   "pr_auc": 0.624,
+   "recall": 0.809,
+   "precision": 0.484,
+   "days": 1461.0
+  },
+  {
+   "Location": "Dartmoor",
+   "rain_share": 0.303,
+   "pr_auc": 0.629,
+   "recall": 0.792,
+   "precision": 0.505,
+   "days": 1460.0
+  },
+  {
+   "Location": "Portland",
+   "rain_share": 0.329,
+   "pr_auc": 0.66,
+   "recall": 0.836,
+   "precision": 0.49,
+   "days": 1449.0
+  },
+  {
+   "Location": "MountGambier",
+   "rain_share": 0.31,
+   "pr_auc": 0.662,
+   "recall": 0.789,
+   "precision": 0.521,
+   "days": 1456.0
+  },
+  {
+   "Location": "Darwin",
+   "rain_share": 0.28,
+   "pr_auc": 0.663,
+   "recall": 0.921,
+   "precision": 0.509,
+   "days": 1489.0
+  },
+  {
+   "Location": "Walpole",
+   "rain_share": 0.327,
+   "pr_auc": 0.684,
+   "recall": 0.853,
+   "precision": 0.501,
+   "days": 1454.0
+  },
+  {
+   "Location": "Witchcliffe",
+   "rain_share": 0.268,
+   "pr_auc": 0.715,
+   "recall": 0.912,
+   "precision": 0.509,
+   "days": 1323.0
+  }
+ ],
+ "recall_by_amount": [
+  {
+   "amount": "1\u20132 mm",
+   "days": 2943.0,
+   "recall": 0.6,
+   "mean_p": 0.307
+  },
+  {
+   "amount": "2\u20135 mm",
+   "days": 4358.0,
+   "recall": 0.65,
+   "mean_p": 0.333
+  },
+  {
+   "amount": "5\u201310 mm",
+   "days": 3312.0,
+   "recall": 0.695,
+   "mean_p": 0.36
+  },
+  {
+   "amount": "10\u201325 mm",
+   "days": 3145.0,
+   "recall": 0.734,
+   "mean_p": 0.382
+  },
+  {
+   "amount": "> 25 mm",
+   "days": 1468.0,
+   "recall": 0.803,
+   "mean_p": 0.409
+  }
+ ],
+ "confusion_lgb": [
+  [
+   37035,
+   14950
+  ],
+  [
+   4839,
+   10387
+  ]
+ ],
+ "weighted_mean_p": {
+  "weighted": 0.3859000092763923,
+  "unweighted": 0.21671017829031042,
+  "true_rate": 0.2265402984630492
+ },
+ "sensitivity": [
+  {
+   "setting": "no missing flags",
+   "log_loss": 0.4466,
+   "brier": 0.1445,
+   "pr_auc": 0.5068,
+   "threshold": 0.22,
+   "precision": 0.4031,
+   "recall": 0.7037,
+   "f1": 0.5126
+  },
+  {
+   "setting": "class weight 3, threshold 0.5",
+   "log_loss": 0.5194,
+   "brier": 0.1748,
+   "pr_auc": 0.5055,
+   "threshold": 0.5,
+   "precision": 0.431,
+   "recall": 0.6281,
+   "f1": 0.5112
+  },
+  {
+   "setting": "baseline design (flags, no weight, thr from val)",
+   "log_loss": 0.447,
+   "brier": 0.1447,
+   "pr_auc": 0.5053,
+   "threshold": 0.23,
+   "precision": 0.41,
+   "recall": 0.6822,
+   "f1": 0.5121
+  },
+  {
+   "setting": "cost ratio 2:1 (theory thr 0.33)",
+   "log_loss": 0.447,
+   "brier": 0.1447,
+   "pr_auc": 0.5053,
+   "threshold": 0.28,
+   "precision": 0.4489,
+   "recall": 0.5807,
+   "f1": 0.5063
+  },
+  {
+   "setting": "cost ratio 5:1 (theory thr 0.17)",
+   "log_loss": 0.447,
+   "brier": 0.1447,
+   "pr_auc": 0.5053,
+   "threshold": 0.14,
+   "precision": 0.3391,
+   "recall": 0.8639,
+   "f1": 0.487
+  }
+ ],
+ "deployment_2026": [
+  {
+   "model": "Always no rain",
+   "log_loss": NaN,
+   "brier": NaN,
+   "roc_auc": NaN,
+   "pr_auc": NaN,
+   "threshold": NaN,
+   "accuracy": 0.75,
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0,
+   "cost_per_day": 0.75
+  },
+  {
+   "model": "Persistence (rain today)",
+   "log_loss": NaN,
+   "brier": NaN,
+   "roc_auc": NaN,
+   "pr_auc": NaN,
+   "threshold": NaN,
+   "accuracy": 0.6702,
+   "precision": 0.3397,
+   "recall": 0.3384,
+   "f1": 0.339,
+   "cost_per_day": 0.6606
+  },
+  {
+   "model": "Humidity3pm > 60",
+   "log_loss": NaN,
+   "brier": NaN,
+   "roc_auc": NaN,
+   "pr_auc": NaN,
+   "threshold": NaN,
+   "accuracy": 0.6378,
+   "precision": 0.3455,
+   "recall": 0.5019,
+   "f1": 0.4093,
+   "cost_per_day": 0.6112
+  },
+  {
+   "model": "LogReg",
+   "log_loss": 0.5325,
+   "brier": 0.1759,
+   "roc_auc": 0.6711,
+   "pr_auc": 0.3978,
+   "threshold": 0.2,
+   "accuracy": 0.6084,
+   "precision": 0.3501,
+   "recall": 0.6616,
+   "f1": 0.4579,
+   "cost_per_day": 0.5608
+  },
+  {
+   "model": "LightGBM",
+   "log_loss": 0.476,
+   "brier": 0.1559,
+   "roc_auc": 0.7706,
+   "pr_auc": 0.5207,
+   "threshold": 0.23,
+   "accuracy": 0.7015,
+   "precision": 0.4408,
+   "recall": 0.7224,
+   "f1": 0.5476,
+   "cost_per_day": 0.4373
+  },
+  {
+   "model": "MLP",
+   "log_loss": 0.4721,
+   "brier": 0.1531,
+   "roc_auc": 0.7775,
+   "pr_auc": 0.5272,
+   "threshold": 0.23,
+   "accuracy": 0.7053,
+   "precision": 0.4467,
+   "recall": 0.749,
+   "f1": 0.5597,
+   "cost_per_day": 0.4202
+  },
+  {
+   "model": "GRU",
+   "log_loss": 0.4748,
+   "brier": 0.1546,
+   "roc_auc": 0.7702,
+   "pr_auc": 0.5257,
+   "threshold": 0.24,
+   "accuracy": 0.7101,
+   "precision": 0.449,
+   "recall": 0.7034,
+   "f1": 0.5481,
+   "cost_per_day": 0.4382
+  },
+  {
+   "model": "Transformer",
+   "log_loss": 0.4763,
+   "brier": 0.1554,
+   "roc_auc": 0.7745,
+   "pr_auc": 0.5149,
+   "threshold": 0.23,
+   "accuracy": 0.7053,
+   "precision": 0.4457,
+   "recall": 0.7338,
+   "f1": 0.5546,
+   "cost_per_day": 0.4278
+  },
+  {
+   "model": "LightGBM retrained to 2026",
+   "log_loss": 0.4685,
+   "brier": 0.1529,
+   "roc_auc": 0.7812,
+   "pr_auc": 0.5333,
+   "threshold": 0.23,
+   "accuracy": 0.6987,
+   "precision": 0.4397,
+   "recall": 0.749,
+   "f1": 0.5541,
+   "cost_per_day": 0.4268
+  }
+ ],
+ "deployment_2026_days": 1052,
+ "deployment_2026_rain_share": 0.25,
+ "deployment_2026_by_city": [
+  {
+   "city": "Sydney",
+   "days": 212,
+   "rain_share": 0.321,
+   "pr_auc": 0.552,
+   "recall": 0.794
+  },
+  {
+   "city": "Melbourne",
+   "days": 212,
+   "rain_share": 0.236,
+   "pr_auc": 0.441,
+   "recall": 0.7
+  },
+  {
+   "city": "Brisbane",
+   "days": 207,
+   "rain_share": 0.285,
+   "pr_auc": 0.556,
+   "recall": 0.78
+  },
+  {
+   "city": "Perth",
+   "days": 212,
+   "rain_share": 0.241,
+   "pr_auc": 0.584,
+   "recall": 0.686
+  },
+  {
+   "city": "Canberra",
+   "days": 209,
+   "rain_share": 0.167,
+   "pr_auc": 0.443,
+   "recall": 0.571
+  }
+ ],
+ "times_s": {
+  "LogReg_train_s": 0.32,
+  "LightGBM_train_s": 7.1,
+  "MLP_train_s_per_seed": 3.75,
+  "GRU_train_s_per_seed": 8.91,
+  "Transformer_train_s_per_seed": 47.76
+ },
+ "latency_ms": {
+  "LogReg": 1.81,
+  "LightGBM": 0.7,
+  "MLP": 0.04,
+  "GRU": 0.08,
+  "Transformer": 0.14
+ }
+}

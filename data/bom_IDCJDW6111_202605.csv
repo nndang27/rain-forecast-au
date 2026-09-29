@@ -1,0 +1,40 @@
+"Daily Weather Observations for Perth, Western Australia for May 2026"
+"Prepared at 13:03 UTC on Friday 18 September 2026   IDCJDW6111.202605"
+"Copyright 2003 Commonwealth Bureau of Meteorology"
+"A combination of observations from Perth Metro and Perth Airport."
+"Significant variations can be experienced across the Perth metropolitan area on individual days. On average the inner city area is warmer overnight than the current observation sites. The current official Perth observation site is Perth Metro, however in the past Perth Regional Office {station 009034} and Perth Gardens {station 009097} have been official Perth observation sites.Some cloud observations are from automated equipment; these are somewhat different to those made by a human observer and may not appear every day."
+"Temperature, humidity, wind, pressure and rainfall observations are from Perth Metro {station 009225}"
+"Cloud, evaporation and sunshine observations are from Perth Airport M.O. {station 009021}"
+
+,"Date","Minimum temperature (°C)","Maximum temperature (°C)","Rainfall (mm)","Evaporation (mm)","Sunshine (hours)","Direction of maximum wind gust ","Speed of maximum wind gust (km/h)","Time of maximum wind gust","9am Temperature (°C)","9am relative humidity (%)","9am cloud amount (oktas)","9am wind direction","9am wind speed (km/h)","9am MSL pressure (hPa)","3pm Temperature (°C)","3pm relative humidity (%)","3pm cloud amount (oktas)","3pm wind direction","3pm wind speed (km/h)","3pm MSL pressure (hPa)"
+,2026-05-1,11.7,17.8,3.6,2.4,7.2,SSW,41,14:47,13.6,63,7,SSE,13,1023.3,16.9,42,2,SSW,17,1022.3
+,2026-05-2,5.0,18.1,0,3.6,9.6,SSE,30,12:01,12.0,67,1, ,Calm,1027.2,17.8,48,1,SSE,13,1023.9
+,2026-05-3,5.9,20.6,0,1.8,9.3,SE,24,11:18,13.1,77,1,SSE,6,1027.4,19.6,51,1,E,9,1024.6
+,2026-05-4,7.2,22.8,0,3.4,9.9,SW,24,15:51,15.3,74,0,NNE,7,1028.4,21.8,46,1,S,6,1025.1
+,2026-05-5,9.7,23.7,0,3.2,9.9,SSW,24,16:23,15.9,65,4,NE,9,1027.1,23.2,41,6,S,9,1024.7
+,2026-05-6,10.2,23.2,0,3.6,9.6,E,46,09:21,15.6,69,0,E,9,1029.9,22.8,44,1,E,11,1027.6
+,2026-05-7,9.7,23.6,0,3.0,9.6,NE,30,12:57,15.5,61,0,E,7,1031.8,23.4,36,0,ESE,7,1027.4
+,2026-05-8,11.7,23.7,0,4.8,9.6,NNE,35,10:50,17.5,57,0,NE,9,1030.4,23.4,35,0,ENE,11,1025.6
+,2026-05-9,11.5,24.0,0,,9.7,NNE,35,10:25,16.5,49,0,NE,17,1028.5,23.3,30,0,NE,13,1024.0
+,2026-05-10,6.8,25.1,0,4.0,9.7,N,28,10:22,16.9,51,0,NE,15,1026.7,24.4,29,0,ENE,9,1022.7
+,2026-05-11,8.0,27.4,0,4.0,9.7,NNE,31,10:23,18.1,50,0,N,15,1023.9,27.1,20,2,NNW,9,1020.6
+,2026-05-12,6.8,28.3,0,4.2,9.5,NNE,24,13:08,16.9,46,0,NW,6,1022.7,27.0,23,0,WSW,9,1019.4
+,2026-05-13,8.9,24.2,0,4.4,8.5,NNE,24,10:07,16.1,50,7,NNE,7,1018.9,23.3,59,6,WNW,9,1016.8
+,2026-05-14,12.7,19.8,0,3.0,1.9,SW,30,16:00,15.4,99,8,S,2,1017.6,18.8,68,5,SW,17,1014.9
+,2026-05-15,9.1,19.4,8.2,1.6,7.8,WSW,20,13:06,12.8,99,7,N,2,1017.2,18.6,57,4,SW,11,1015.9
+,2026-05-16,10.7,19.7,0,2.2,4.9,N,50,09:49,14.2,73,5,NE,9,1019.4,18.1,57,7,SW,13,1017.9
+,2026-05-17,7.3,21.6,0,1.8,9.1,WSW,20,13:04,13.1,78,1,NNE,6,1021.8,20.7,56,6,WSW,7,1019.9
+,2026-05-18,9.7,20.9,0,2.2,0.9,SSE,15,15:14,15.0,96,7,SSE,2,1025.0,20.4,67,7,SSE,9,1023.0
+,2026-05-19,9.1,27.3,0,1.2,9.5,E,46,09:34,16.1,69,0,ESE,6,1024.1,26.0,27,0,NNE,7,1019.7
+,2026-05-20,8.2,26.0,0,2.6,5.6,NE,17,06:23,14.9,52,7,NNE,4,1018.5,25.0,28,7,WSW,7,1016.4
+,2026-05-21,9.1,22.9,0,2.4,8.3,SSW,39,16:07,16.2,61,4, ,Calm,1017.6,21.4,66,2,SSW,15,1016.6
+,2026-05-22,6.7,19.2,0,3.0,9.2,SSE,24,11:13,13.5,80,0,SSE,7,1024.6,18.4,37,1,SSW,11,1023.5
+,2026-05-23,4.0,18.5,0,2.8,9.0,SSW,17,12:56,11.0,68,4,ENE,4,1028.9,17.9,38,1,SSE,6,1025.7
+,2026-05-24,2.5,20.9,0,1.4,8.6,NE,30,11:25,11.5,64,1,NE,6,1030.0,20.2,34,7,NE,11,1025.8
+,2026-05-25,4.5,24.1,0,2.8,8.7,NNE,50,15:23,13.5,48,3,NE,13,1026.5,23.8,21,0,N,15,1022.4
+,2026-05-26,9.6,24.8,0,4.8,6.8,NE,35,11:29,16.6,42,1,NE,13,1022.2,23.9,27,7,N,9,1018.9
+,2026-05-27,12.7,21.8,0,3.2,0.0,NNE,33,16:37,17.5,46,7,NNE,9,1017.2,21.1,38,8,S,9,1013.7
+,2026-05-28,14.5,20.8,19.2,1.2,7.3,SW,35,12:17,17.0,85,6,SW,7,1014.9,20.1,56,4,SW,15,1014.7
+,2026-05-29,11.5,18.3,2.4,2.4,0.9,NNE,15,04:48,14.0,99,7, ,Calm,1018.2,17.3,78,7,N,7,1016.1
+,2026-05-30,9.1,20.7,0.2,2.2,2.2,N,48,21:47,13.3,86,6,NE,2,1014.5,18.1,70,8,NE,13,1007.3
+,2026-05-31,13.2,17.8,19.6,0.0,2.8,WNW,65,15:26,15.4,71,7,W,20,1001.1,13.3,81,7,WNW,22,1001.2

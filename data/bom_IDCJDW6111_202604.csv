@@ -1,0 +1,39 @@
+"Daily Weather Observations for Perth, Western Australia for April 2026"
+"Prepared at 13:03 UTC on Saturday 19 September 2026   IDCJDW6111.202604"
+"Copyright 2003 Commonwealth Bureau of Meteorology"
+"A combination of observations from Perth Metro and Perth Airport."
+"Significant variations can be experienced across the Perth metropolitan area on individual days. On average the inner city area is warmer overnight than the current observation sites. The current official Perth observation site is Perth Metro, however in the past Perth Regional Office {station 009034} and Perth Gardens {station 009097} have been official Perth observation sites.Some cloud observations are from automated equipment; these are somewhat different to those made by a human observer and may not appear every day."
+"Temperature, humidity, wind, pressure and rainfall observations are from Perth Metro {station 009225}"
+"Cloud, evaporation and sunshine observations are from Perth Airport M.O. {station 009021}"
+
+,"Date","Minimum temperature (°C)","Maximum temperature (°C)","Rainfall (mm)","Evaporation (mm)","Sunshine (hours)","Direction of maximum wind gust ","Speed of maximum wind gust (km/h)","Time of maximum wind gust","9am Temperature (°C)","9am relative humidity (%)","9am cloud amount (oktas)","9am wind direction","9am wind speed (km/h)","9am MSL pressure (hPa)","3pm Temperature (°C)","3pm relative humidity (%)","3pm cloud amount (oktas)","3pm wind direction","3pm wind speed (km/h)","3pm MSL pressure (hPa)"
+,2026-04-1,9.8,24.1,0,2.2,10.0,SW,28,15:25,18.7,70,2,NE,11,1021.5,22.5,54,7,WSW,17,1019.4
+,2026-04-2,15.4,28.4,0,4.8,10.7,SE,31,23:36,20.2,56,5,ESE,11,1020.3,28.2,36,1,S,9,1016.6
+,2026-04-3,18.1,29.0,0,5.6,10.7,ENE,28,08:34,22.1,64,1,E,11,1017.5,28.4,47,2,ESE,9,1013.9
+,2026-04-4,17.0,28.0,0,4.8,10.2,SW,28,15:57,22.5,63,1, ,Calm,1013.8,25.7,55,2,WSW,15,1012.5
+,2026-04-5,15.0,24.8,0,4.2,9.5,SW,33,14:38,21.5,68,5,S,13,1016.9,23.1,56,2,SSW,17,1016.3
+,2026-04-6,15.8,18.6,0,5.4,0.0,S,26,15:05,17.0,69,8,ESE,7,1020.3,17.8,78,8,S,13,1018.0
+,2026-04-7,13.7,24.1,0,0.8,7.2,SSW,31,15:28,16.5,77,7,SSE,11,1017.3,23.0,53,6,SW,17,1014.4
+,2026-04-8,9.8,22.4,0,3.4,10.1,SW,31,15:22,18.0,59,1,E,7,1017.2,20.8,50,5,WSW,15,1015.4
+,2026-04-9,13.6,23.8,0,3.8,8.6,SSW,31,15:09,19.0,67,2,SSE,11,1020.3,22.6,52,7,SSW,15,1019.1
+,2026-04-10,14.1,26.1,0,,8.2,E,28,02:28,16.8,59,7,ESE,11,1024.0,25.4,36,7,ENE,9,1019.7
+,2026-04-11,13.9,28.5,0,5.6,10.6,E,26,00:44,18.7,53,0,E,9,1021.5,27.9,32,0,SSE,9,1017.7
+,2026-04-12,12.9,31.3,0,4.0,10.7,SW,22,15:45,23.1,47,0,ENE,6,1018.6,29.4,37,1,SSW,11,1015.3
+,2026-04-13,15.7,27.3,0,4.0,10.5,SW,24,14:39,19.6,80,0,S,9,1020.9,26.1,53,0,SW,13,1019.0
+,2026-04-14,16.9,30.3,0,5.6,9.4,ENE,28,05:38,20.0,64,1,E,7,1021.6,29.7,38,3,SSW,7,1017.0
+,2026-04-15,17.0,23.2,11.6,4.2,2.8,NNE,41,09:23,18.9,95,7,WSW,13,1017.4,21.7,74,7,S,7,1014.5
+,2026-04-16,13.1,27.5,1.0,2.2,10.5,SSW,22,17:05,20.2,74,1,ESE,7,1016.2,26.8,50,2,SSW,9,1012.9
+,2026-04-17,14.2,23.9,0,4.0,3.8,WNW,28,13:25,19.8,80,7,S,2,1012.3,22.5,61,7,W,9,1011.2
+,2026-04-18,13.7,21.9,8.0,2.6,9.1,WSW,28,00:04,17.4,65,3,SE,9,1018.3,21.1,47,5,SW,13,1017.8
+,2026-04-19,10.1,22.8,0,3.2,7.9,WSW,24,16:08,18.3,55,4,ENE,7,1021.3,22.0,46,5,SW,11,1017.8
+,2026-04-20,9.6,23.2,0,3.0,8.4,WSW,52,23:56,17.4,63,1,NNE,9,1013.6,21.3,64,5,NW,13,1009.5
+,2026-04-21,14.1,20.0,3.8,4.2,7.4,SW,43,03:31,16.3,62,2,S,9,1019.9,19.4,44,2,S,9,1019.5
+,2026-04-22,7.2,24.0,0.2,2.4,9.9,WSW,24,14:31,15.8,52,1,NE,11,1019.2,22.2,33,3,WSW,13,1013.2
+,2026-04-23,11.9,21.2,1.8,3.6,4.4,SW,44,12:07,17.9,70,8,WSW,15,1013.5,20.0,51,3,WSW,17,1014.3
+,2026-04-24,11.1,20.9,1.6,2.8,4.9,SW,26,14:25,14.5,99,6,NNE,9,1019.8,19.7,58,6,WSW,13,1019.5
+,2026-04-25,7.7,22.9,0.2,2.4,10.2,S,24,14:24,15.3,75,1,N,7,1025.4,21.7,50,1,SW,13,1022.6
+,2026-04-26,7.5,26.3,0,2.2,6.8,ENE,20,09:33,17.0,67,7,E,7,1023.3,25.4,34,7,NE,4,1018.4
+,2026-04-27,15.1,17.0,1.6,2.6,0.0,SSW,22,09:51,15.8,90,8,N,9,1014.8,15.0,99,8,SE,9,1014.0
+,2026-04-28,13.2,20.6,8.0,0.6,0.1,ENE,22,14:05,17.0,85,7,SE,6,1018.1,20.4,72,7,E,9,1015.6
+,2026-04-29,12.9,23.0,0,1.0,4.0,SW,19,15:08,17.5,92,7,SE,7,1015.8,22.3,63,7,SW,9,1013.7
+,2026-04-30,12.0,21.4,0,1.6,5.5,SW,33,12:25,14.1,99,1, ,Calm,1017.5,21.1,64,6,SSW,13,1016.0
