@@ -20,6 +20,7 @@ The notebook downloads its data from the original sources and uses the copies in
 | `data/weatherAUS.csv` | Snapshot of the rattle weatherAUS file (Bureau of Meteorology data, to 30 Jan 2026) |
 | `data/bom_*.csv` | BOM Daily Weather Observations, Jan–Sep 2026, five cities |
 | `figures/`, `results/` | Figures and numbers used in the journal |
+| `requirements.txt` | Library versions used to produce the results |
 
 ## Data sources
 

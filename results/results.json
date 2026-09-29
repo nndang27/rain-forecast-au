@@ -1,4 +1,14 @@
 {
+ "versions": {
+  "python": "3.11.8",
+  "pandas": "2.2.2",
+  "numpy": "2.4.3",
+  "scikit-learn": "1.8.0",
+  "lightgbm": "4.6.0",
+  "torch": "2.11.0",
+  "matplotlib": "3.9.3",
+  "requests": "2.32.5"
+ },
  "data": {
   "rows": 275410,
   "locations": 49,
@@ -17,8 +27,9 @@
   },
   "raintomorrow_yes": 0.214,
   "stations_no_sunshine": 19,
-  "rows_honest": 266609,
-  "positive_share_honest": 0.22024387773856097
+  "labels_removed_accumulated": 2478,
+  "rows_honest": 264131,
+  "positive_share_honest": 0.21836134342428568
  },
  "leak": {
   "riskmm_equals_next_rain": 1.0,
@@ -26,65 +37,65 @@
  },
  "split_counts": {
   "rows": {
-   "train": 166216,
-   "val": 33182,
-   "test": 67211
+   "train": 164655,
+   "val": 32910,
+   "test": 66566
   },
   "rain_share": {
-   "train": 0.2144,
-   "val": 0.2365,
-   "test": 0.2265
+   "train": 0.2121,
+   "val": 0.2352,
+   "test": 0.2256
   }
  },
  "lgb_importance_top10": {
-  "Location": 0.188,
-  "Humidity3pm": 0.16,
-  "Pressure3pm": 0.093,
-  "PressureChange": 0.065,
-  "Rainfall": 0.051,
-  "WindDir3pm_cos": 0.051,
-  "month_cos": 0.04,
-  "Pressure9am": 0.028,
-  "Cloud3pm": 0.028,
-  "MinTemp": 0.025
+  "Location": 0.178,
+  "Humidity3pm": 0.152,
+  "Pressure3pm": 0.09,
+  "PressureChange": 0.062,
+  "WindDir3pm_cos": 0.049,
+  "Rainfall": 0.043,
+  "month_cos": 0.038,
+  "Pressure9am": 0.03,
+  "Temp3pm": 0.029,
+  "Cloud3pm": 0.028
  },
  "mlp_params": 13841,
  "transformer_params": 20113,
  "attention_from_day_t": {
   "all": [
-   0.1396999955177307,
-   0.1404000073671341,
-   0.1387999951839447,
-   0.15039999783039093,
-   0.13670000433921814,
-   0.15299999713897705,
-   0.14100000262260437
+   0.14110000431537628,
+   0.14079999923706055,
+   0.14100000262260437,
+   0.1462000012397766,
+   0.1404999941587448,
+   0.14749999344348907,
+   0.1429000049829483
   ],
   "rain": [
-   0.1454000025987625,
-   0.1420000046491623,
-   0.14059999585151672,
-   0.15129999816417694,
-   0.13379999995231628,
-   0.14959999918937683,
-   0.13740000128746033
+   0.14720000326633453,
+   0.14090000092983246,
+   0.13930000364780426,
+   0.1467999964952469,
+   0.13979999721050262,
+   0.14630000293254852,
+   0.13979999721050262
   ],
   "dry": [
-   0.13809999823570251,
-   0.13989999890327454,
-   0.13819999992847443,
-   0.1501999944448471,
-   0.13760000467300415,
-   0.15389999747276306,
-   0.1421000063419342
+   0.13930000364780426,
+   0.14079999923706055,
+   0.14149999618530273,
+   0.1459999978542328,
+   0.14069999754428864,
+   0.1477999985218048,
+   0.14380000531673431
   ]
  },
  "thresholds": {
-  "LogReg": 0.2,
-  "LightGBM": 0.23,
-  "MLP": 0.23,
+  "LogReg": 0.21,
+  "LightGBM": 0.21,
+  "MLP": 0.24,
   "GRU": 0.24,
-  "Transformer": 0.23
+  "Transformer": 0.27
  },
  "main_test": [
   {
@@ -94,11 +105,11 @@
    "roc_auc": NaN,
    "pr_auc": NaN,
    "threshold": NaN,
-   "accuracy": 0.7735,
+   "accuracy": 0.7744,
    "precision": 0.0,
    "recall": 0.0,
    "f1": 0.0,
-   "cost_per_day": 0.6796
+   "cost_per_day": 0.6768
   },
   {
    "model": "Persistence (rain today)",
@@ -107,24 +118,24 @@
    "roc_auc": NaN,
    "pr_auc": NaN,
    "threshold": NaN,
-   "accuracy": 0.7059,
-   "precision": 0.3491,
-   "recall": 0.3451,
-   "f1": 0.3471,
-   "cost_per_day": 0.5908
+   "accuracy": 0.7064,
+   "precision": 0.3486,
+   "recall": 0.3471,
+   "f1": 0.3479,
+   "cost_per_day": 0.5882
   },
   {
    "model": "Climatology (station x month)",
-   "log_loss": 0.4999,
-   "brier": 0.163,
-   "roc_auc": 0.6774,
-   "pr_auc": 0.3736,
-   "threshold": 0.21,
-   "accuracy": 0.6077,
-   "precision": 0.323,
-   "recall": 0.6674,
-   "f1": 0.4353,
-   "cost_per_day": 0.543
+   "log_loss": 0.4998,
+   "brier": 0.1627,
+   "roc_auc": 0.6764,
+   "pr_auc": 0.3717,
+   "threshold": 0.24,
+   "accuracy": 0.6656,
+   "precision": 0.3456,
+   "recall": 0.5399,
+   "f1": 0.4214,
+   "cost_per_day": 0.542
   },
   {
    "model": "Humidity3pm > 60",
@@ -133,168 +144,168 @@
    "roc_auc": NaN,
    "pr_auc": NaN,
    "threshold": NaN,
-   "accuracy": 0.6633,
-   "precision": 0.3429,
-   "recall": 0.5309,
-   "f1": 0.4167,
-   "cost_per_day": 0.5493
+   "accuracy": 0.6634,
+   "precision": 0.3416,
+   "recall": 0.5301,
+   "f1": 0.4154,
+   "cost_per_day": 0.5486
   },
   {
    "model": "LogReg",
-   "log_loss": 0.4812,
-   "brier": 0.1568,
+   "log_loss": 0.4805,
+   "brier": 0.1565,
    "roc_auc": 0.7187,
-   "pr_auc": 0.4202,
-   "threshold": 0.2,
-   "accuracy": 0.6324,
-   "precision": 0.3474,
-   "recall": 0.7088,
-   "f1": 0.4663,
-   "cost_per_day": 0.4995
+   "pr_auc": 0.4184,
+   "threshold": 0.21,
+   "accuracy": 0.6548,
+   "precision": 0.3572,
+   "recall": 0.6629,
+   "f1": 0.4643,
+   "cost_per_day": 0.4973
   },
   {
    "model": "LightGBM",
-   "log_loss": 0.447,
-   "brier": 0.1447,
-   "roc_auc": 0.7728,
-   "pr_auc": 0.5053,
-   "threshold": 0.23,
-   "accuracy": 0.7056,
-   "precision": 0.41,
-   "recall": 0.6822,
-   "f1": 0.5121,
-   "cost_per_day": 0.4384
+   "log_loss": 0.4456,
+   "brier": 0.1442,
+   "roc_auc": 0.7738,
+   "pr_auc": 0.5056,
+   "threshold": 0.21,
+   "accuracy": 0.6906,
+   "precision": 0.3971,
+   "recall": 0.7167,
+   "f1": 0.5111,
+   "cost_per_day": 0.4372
   },
   {
    "model": "MLP",
-   "log_loss": 0.4453,
-   "brier": 0.1442,
-   "roc_auc": 0.7752,
-   "pr_auc": 0.5064,
-   "threshold": 0.23,
-   "accuracy": 0.6897,
-   "precision": 0.3983,
-   "recall": 0.7239,
-   "f1": 0.5138,
-   "cost_per_day": 0.4354
+   "log_loss": 0.445,
+   "brier": 0.144,
+   "roc_auc": 0.7737,
+   "pr_auc": 0.5062,
+   "threshold": 0.24,
+   "accuracy": 0.7007,
+   "precision": 0.4058,
+   "recall": 0.7035,
+   "f1": 0.5147,
+   "cost_per_day": 0.4331
   },
   {
    "model": "GRU",
-   "log_loss": 0.4562,
-   "brier": 0.1478,
-   "roc_auc": 0.7588,
+   "log_loss": 0.4561,
+   "brier": 0.1476,
+   "roc_auc": 0.7587,
    "pr_auc": 0.4833,
    "threshold": 0.24,
-   "accuracy": 0.6877,
-   "precision": 0.3921,
-   "recall": 0.6874,
-   "f1": 0.4994,
-   "cost_per_day": 0.4539
+   "accuracy": 0.7002,
+   "precision": 0.4009,
+   "recall": 0.6651,
+   "f1": 0.5002,
+   "cost_per_day": 0.4509
   },
   {
    "model": "Transformer",
-   "log_loss": 0.4542,
-   "brier": 0.1471,
-   "roc_auc": 0.7642,
-   "pr_auc": 0.489,
-   "threshold": 0.23,
-   "accuracy": 0.6925,
-   "precision": 0.3979,
-   "recall": 0.6963,
-   "f1": 0.5064,
-   "cost_per_day": 0.4451
+   "log_loss": 0.4527,
+   "brier": 0.1467,
+   "roc_auc": 0.7643,
+   "pr_auc": 0.4878,
+   "threshold": 0.27,
+   "accuracy": 0.7092,
+   "precision": 0.4097,
+   "recall": 0.656,
+   "f1": 0.5044,
+   "cost_per_day": 0.4461
   },
   {
    "model": "LightGBM (default 0.5)",
-   "log_loss": 0.447,
-   "brier": 0.1447,
-   "roc_auc": 0.7728,
-   "pr_auc": 0.5053,
+   "log_loss": 0.4456,
+   "brier": 0.1442,
+   "roc_auc": 0.7738,
+   "pr_auc": 0.5056,
    "threshold": 0.5,
-   "accuracy": 0.7949,
-   "precision": 0.6346,
-   "recall": 0.2233,
-   "f1": 0.3304,
-   "cost_per_day": 0.557
+   "accuracy": 0.7959,
+   "precision": 0.6355,
+   "recall": 0.2238,
+   "f1": 0.331,
+   "cost_per_day": 0.5543
   }
  ],
  "seed_var": {
   "MLP": {
    "log_loss": [
-    0.44605672234886146,
-    0.0008649093113838343
+    0.44520049888114516,
+    0.00014108180938164738
    ],
    "pr_auc": [
-    0.5064656160578153,
-    0.0019817324339691245
+    0.5053471574607454,
+    0.0007768378656340805
    ],
    "recall": [
-    0.7211567932046061,
-    0.009909269561650783
+    0.6956541039641321,
+    0.016720350194747706
    ],
    "f1": [
-    0.5132800224066275,
-    0.0016426854290155517
+    0.5145609739841966,
+    0.0010256588070010639
    ],
    "cost_per_day": [
-    0.43619348023389026,
-    0.0018514041130531828
+    0.43347454656531365,
+    0.0008822976490195022
    ]
   },
   "GRU": {
    "log_loss": [
-    0.45533473546716285,
-    0.0014030264352448963
+    0.4548607948868774,
+    0.0011481613834744037
    ],
    "pr_auc": [
-    0.4861284191888555,
-    0.0037904680345692775
+    0.485512504018605,
+    0.0022339297839963947
    ],
    "recall": [
-    0.6833705503743598,
-    0.005486694429510207
+    0.6734807120344476,
+    0.007285192337141701
    ],
    "f1": [
-    0.501882587685239,
-    0.0021902569784524916
+    0.5014050871771157,
+    0.002407579261148981
    ],
    "cost_per_day": [
-    0.4507744268051361,
-    0.0026967081023823443
+    0.4495187733477551,
+    0.0029217608266613165
    ]
   },
   "Transformer": {
    "log_loss": [
-    0.45308857491732185,
-    0.0010564026115743657
+    0.4526855932884571,
+    0.0018086219431266812
    ],
    "pr_auc": [
-    0.4920302080160899,
-    0.00314471420965039
+    0.490363401047391,
+    0.003910672858866629
    ],
    "recall": [
-    0.7096851876176715,
-    0.01399251755955067
+    0.633994761841346,
+    0.022701138673956213
    ],
    "f1": [
-    0.5049706666273549,
-    0.0029489000752622625
+    0.5036220793343232,
+    0.003274938633629997
    ],
    "cost_per_day": [
-    0.44680682229595353,
-    0.0036659570692704527
+    0.4470600606916444,
+    0.00373122470652055
    ]
   }
  },
  "task_gap": [
   {
    "task": "This project (9am t+1 \u2192 9am t+2, time-safe inputs)",
-   "pr_auc": 0.5053,
-   "roc_auc": 0.7728,
-   "recall": 0.6822,
-   "precision": 0.41,
-   "f1": 0.5121,
-   "accuracy": 0.7056
+   "pr_auc": 0.5056,
+   "roc_auc": 0.7738,
+   "recall": 0.7167,
+   "precision": 0.3971,
+   "f1": 0.5111,
+   "accuracy": 0.6906
   },
   {
    "task": "Standard Kaggle task (RainTomorrow, all columns of day t)",
@@ -316,640 +327,652 @@
   }
  ],
  "random_vs_time": {
-  "random_split_pr_auc": 0.5162214151531282,
-  "time_split_pr_auc": 0.5052639940031521
+  "random_split_pr_auc": 0.5144096821347086,
+  "time_split_pr_auc": 0.5056364372072373
  },
  "rolling": {
   "per_year": [
    {
     "model": "LogReg",
     "year": 2020,
-    "pr_auc": 0.4013,
-    "recall": 0.7052,
-    "f1": 0.4581,
-    "cost_per_day": 0.5185,
-    "rain_share": 0.2297
+    "pr_auc": 0.4,
+    "recall": 0.6591,
+    "f1": 0.4558,
+    "cost_per_day": 0.5152,
+    "rain_share": 0.2284
    },
    {
     "model": "LightGBM",
     "year": 2020,
-    "pr_auc": 0.4863,
-    "recall": 0.6672,
-    "f1": 0.5021,
-    "cost_per_day": 0.4567,
-    "rain_share": 0.2297
+    "pr_auc": 0.4843,
+    "recall": 0.6961,
+    "f1": 0.4986,
+    "cost_per_day": 0.4587,
+    "rain_share": 0.2284
    },
    {
     "model": "LogReg",
     "year": 2021,
-    "pr_auc": 0.4467,
-    "recall": 0.7324,
-    "f1": 0.4926,
-    "cost_per_day": 0.4982,
-    "rain_share": 0.2437
+    "pr_auc": 0.4466,
+    "recall": 0.6914,
+    "f1": 0.4888,
+    "cost_per_day": 0.5,
+    "rain_share": 0.2423
    },
    {
     "model": "LightGBM",
     "year": 2021,
-    "pr_auc": 0.5388,
-    "recall": 0.7114,
-    "f1": 0.5394,
-    "cost_per_day": 0.4368,
-    "rain_share": 0.2437
+    "pr_auc": 0.5422,
+    "recall": 0.7511,
+    "f1": 0.5389,
+    "cost_per_day": 0.432,
+    "rain_share": 0.2423
    },
    {
     "model": "LogReg",
     "year": 2022,
-    "pr_auc": 0.4977,
-    "recall": 0.7477,
-    "f1": 0.5186,
-    "cost_per_day": 0.5235,
-    "rain_share": 0.2766
+    "pr_auc": 0.4966,
+    "recall": 0.7092,
+    "f1": 0.5179,
+    "cost_per_day": 0.5243,
+    "rain_share": 0.2756
    },
    {
     "model": "LightGBM",
     "year": 2022,
-    "pr_auc": 0.5833,
-    "recall": 0.7398,
-    "f1": 0.5688,
-    "cost_per_day": 0.4542,
-    "rain_share": 0.2766
+    "pr_auc": 0.5819,
+    "recall": 0.7742,
+    "f1": 0.567,
+    "cost_per_day": 0.4504,
+    "rain_share": 0.2756
    },
    {
     "model": "LogReg",
     "year": 2023,
-    "pr_auc": 0.3806,
-    "recall": 0.7167,
-    "f1": 0.4439,
-    "cost_per_day": 0.4931,
-    "rain_share": 0.2087
+    "pr_auc": 0.3785,
+    "recall": 0.6792,
+    "f1": 0.447,
+    "cost_per_day": 0.4824,
+    "rain_share": 0.2077
    },
    {
     "model": "LightGBM",
     "year": 2023,
-    "pr_auc": 0.4581,
-    "recall": 0.6707,
-    "f1": 0.4842,
-    "cost_per_day": 0.4358,
-    "rain_share": 0.2087
+    "pr_auc": 0.4563,
+    "recall": 0.7078,
+    "f1": 0.4797,
+    "cost_per_day": 0.4404,
+    "rain_share": 0.2077
    },
    {
     "model": "LogReg",
     "year": 2024,
-    "pr_auc": 0.3808,
-    "recall": 0.7167,
-    "f1": 0.4424,
-    "cost_per_day": 0.4939,
-    "rain_share": 0.2081
+    "pr_auc": 0.3766,
+    "recall": 0.6743,
+    "f1": 0.4414,
+    "cost_per_day": 0.4872,
+    "rain_share": 0.2066
    },
    {
     "model": "LightGBM",
     "year": 2024,
-    "pr_auc": 0.4782,
-    "recall": 0.7051,
-    "f1": 0.4929,
-    "cost_per_day": 0.4247,
-    "rain_share": 0.2081
+    "pr_auc": 0.475,
+    "recall": 0.7369,
+    "f1": 0.4877,
+    "cost_per_day": 0.4286,
+    "rain_share": 0.2066
    },
    {
     "model": "LogReg",
     "year": 2025,
-    "pr_auc": 0.4026,
-    "recall": 0.7206,
-    "f1": 0.4569,
-    "cost_per_day": 0.4989,
-    "rain_share": 0.2196
+    "pr_auc": 0.4028,
+    "recall": 0.6774,
+    "f1": 0.4523,
+    "cost_per_day": 0.5006,
+    "rain_share": 0.219
    },
    {
     "model": "LightGBM",
     "year": 2025,
-    "pr_auc": 0.505,
-    "recall": 0.705,
-    "f1": 0.5091,
-    "cost_per_day": 0.4282,
-    "rain_share": 0.2196
+    "pr_auc": 0.5045,
+    "recall": 0.7447,
+    "f1": 0.5076,
+    "cost_per_day": 0.4283,
+    "rain_share": 0.219
    }
   ],
   "summary": {
    "LightGBM": {
     "pr_auc": [
-     0.508,
-     0.046
+     0.507,
+     0.047
     ],
     "recall": [
-     0.7,
-     0.027
+     0.735,
+     0.029
     ],
     "f1": [
-     0.516,
-     0.032
+     0.513,
+     0.033
     ],
     "cost_per_day": [
-     0.439,
+     0.44,
      0.013
     ]
    },
    "LogReg": {
     "pr_auc": [
-     0.418,
-     0.046
+     0.417,
+     0.047
     ],
     "recall": [
-     0.723,
-     0.015
+     0.682,
+     0.017
     ],
     "f1": [
-     0.469,
+     0.467,
      0.03
     ],
     "cost_per_day": [
-     0.504,
-     0.013
+     0.502,
+     0.016
     ]
    }
   }
  },
  "unseen_stations": {
   "unseen_pr_auc": [
-   0.43525634706173444,
-   0.05573056553639444
+   0.43507629503101974,
+   0.04726066702421082
   ],
   "seen_pr_auc": [
-   0.46548123251081364,
-   0.012030854185119729
+   0.4655099114123963,
+   0.010332161785519673
   ],
   "unseen_recall": [
-   0.6573272876939,
-   0.0379721909946739
+   0.7061713293051104,
+   0.03725343786903035
   ]
  },
  "per_location": [
   {
    "Location": "Woomera",
-   "rain_share": 0.065,
-   "pr_auc": 0.199,
-   "recall": 0.137,
-   "precision": 0.351,
-   "days": 1458.0
-  },
-  {
-   "Location": "SalmonGums",
-   "rain_share": 0.127,
-   "pr_auc": 0.242,
-   "recall": 0.351,
-   "precision": 0.264,
-   "days": 1478.0
+   "rain_share": 0.063,
+   "pr_auc": 0.227,
+   "recall": 0.167,
+   "precision": 0.273,
+   "days": 1434.0
   },
   {
    "Location": "Mildura",
-   "rain_share": 0.109,
-   "pr_auc": 0.259,
-   "recall": 0.325,
-   "precision": 0.352,
-   "days": 1447.0
+   "rain_share": 0.1,
+   "pr_auc": 0.234,
+   "recall": 0.338,
+   "precision": 0.312,
+   "days": 1420.0
   },
   {
-   "Location": "Uluru",
-   "rain_share": 0.085,
-   "pr_auc": 0.26,
-   "recall": 0.317,
-   "precision": 0.305,
-   "days": 1478.0
-  },
-  {
-   "Location": "Sale",
-   "rain_share": 0.207,
-   "pr_auc": 0.269,
-   "recall": 0.128,
-   "precision": 0.271,
+   "Location": "SalmonGums",
+   "rain_share": 0.128,
+   "pr_auc": 0.245,
+   "recall": 0.426,
+   "precision": 0.258,
    "days": 1468.0
   },
   {
-   "Location": "Cobar",
-   "rain_share": 0.129,
-   "pr_auc": 0.294,
-   "recall": 0.277,
-   "precision": 0.28,
-   "days": 1484.0
+   "Location": "Uluru",
+   "rain_share": 0.086,
+   "pr_auc": 0.278,
+   "recall": 0.389,
+   "precision": 0.288,
+   "days": 1468.0
+  },
+  {
+   "Location": "Sale",
+   "rain_share": 0.206,
+   "pr_auc": 0.29,
+   "recall": 0.242,
+   "precision": 0.299,
+   "days": 1449.0
   },
   {
    "Location": "AliceSprings",
-   "rain_share": 0.076,
-   "pr_auc": 0.311,
-   "recall": 0.339,
-   "precision": 0.317,
-   "days": 1466.0
-  },
-  {
-   "Location": "Canberra",
-   "rain_share": 0.186,
-   "pr_auc": 0.315,
-   "recall": 0.545,
-   "precision": 0.34,
-   "days": 1488.0
-  },
-  {
-   "Location": "Hobart",
-   "rain_share": 0.208,
-   "pr_auc": 0.319,
-   "recall": 0.577,
-   "precision": 0.296,
-   "days": 1487.0
-  },
-  {
-   "Location": "Moree",
-   "rain_share": 0.149,
-   "pr_auc": 0.322,
-   "recall": 0.377,
-   "precision": 0.309,
-   "days": 1442.0
+   "rain_share": 0.077,
+   "pr_auc": 0.309,
+   "recall": 0.378,
+   "precision": 0.29,
+   "days": 1447.0
   },
   {
    "Location": "Launceston",
    "rain_share": 0.22,
-   "pr_auc": 0.324,
-   "recall": 0.494,
-   "precision": 0.345,
-   "days": 1480.0
+   "pr_auc": 0.322,
+   "recall": 0.548,
+   "precision": 0.327,
+   "days": 1476.0
+  },
+  {
+   "Location": "Hobart",
+   "rain_share": 0.209,
+   "pr_auc": 0.323,
+   "recall": 0.632,
+   "precision": 0.294,
+   "days": 1485.0
+  },
+  {
+   "Location": "Canberra",
+   "rain_share": 0.186,
+   "pr_auc": 0.327,
+   "recall": 0.578,
+   "precision": 0.33,
+   "days": 1487.0
+  },
+  {
+   "Location": "Cobar",
+   "rain_share": 0.129,
+   "pr_auc": 0.328,
+   "recall": 0.351,
+   "precision": 0.303,
+   "days": 1479.0
+  },
+  {
+   "Location": "Moree",
+   "rain_share": 0.149,
+   "pr_auc": 0.334,
+   "recall": 0.425,
+   "precision": 0.315,
+   "days": 1435.0
   },
   {
    "Location": "Tuggeranong",
    "rain_share": 0.187,
-   "pr_auc": 0.337,
-   "recall": 0.56,
-   "precision": 0.327,
-   "days": 1481.0
+   "pr_auc": 0.344,
+   "recall": 0.594,
+   "precision": 0.311,
+   "days": 1475.0
   },
   {
    "Location": "Nhil",
    "rain_share": 0.16,
-   "pr_auc": 0.396,
-   "recall": 0.522,
-   "precision": 0.369,
-   "days": 1435.0
-  },
-  {
-   "Location": "Bendigo",
-   "rain_share": 0.172,
-   "pr_auc": 0.399,
-   "recall": 0.575,
-   "precision": 0.342,
-   "days": 1461.0
-  },
-  {
-   "Location": "MelbourneAirport",
-   "rain_share": 0.211,
-   "pr_auc": 0.405,
-   "recall": 0.65,
-   "precision": 0.349,
-   "days": 1485.0
-  },
-  {
-   "Location": "WaggaWagga",
-   "rain_share": 0.186,
-   "pr_auc": 0.406,
-   "recall": 0.564,
-   "precision": 0.371,
-   "days": 1477.0
-  },
-  {
-   "Location": "BadgerysCreek",
-   "rain_share": 0.225,
-   "pr_auc": 0.407,
-   "recall": 0.524,
-   "precision": 0.371,
-   "days": 1380.0
+   "pr_auc": 0.39,
+   "recall": 0.559,
+   "precision": 0.362,
+   "days": 1429.0
   },
   {
    "Location": "Penrith",
    "rain_share": 0.222,
-   "pr_auc": 0.407,
-   "recall": 0.601,
-   "precision": 0.366,
-   "days": 1469.0
+   "pr_auc": 0.393,
+   "recall": 0.618,
+   "precision": 0.338,
+   "days": 1453.0
   },
   {
-   "Location": "Albury",
-   "rain_share": 0.2,
-   "pr_auc": 0.408,
-   "recall": 0.617,
-   "precision": 0.361,
-   "days": 1478.0
+   "Location": "MelbourneAirport",
+   "rain_share": 0.211,
+   "pr_auc": 0.394,
+   "recall": 0.715,
+   "precision": 0.345,
+   "days": 1482.0
+  },
+  {
+   "Location": "Bendigo",
+   "rain_share": 0.174,
+   "pr_auc": 0.411,
+   "recall": 0.61,
+   "precision": 0.341,
+   "days": 1445.0
+  },
+  {
+   "Location": "BadgerysCreek",
+   "rain_share": 0.226,
+   "pr_auc": 0.417,
+   "recall": 0.59,
+   "precision": 0.369,
+   "days": 1370.0
   },
   {
    "Location": "Richmond",
-   "rain_share": 0.229,
-   "pr_auc": 0.421,
-   "recall": 0.643,
+   "rain_share": 0.228,
+   "pr_auc": 0.419,
+   "recall": 0.693,
+   "precision": 0.359,
+   "days": 1384.0
+  },
+  {
+   "Location": "WaggaWagga",
+   "rain_share": 0.186,
+   "pr_auc": 0.42,
+   "recall": 0.586,
+   "precision": 0.371,
+   "days": 1468.0
+  },
+  {
+   "Location": "Albury",
+   "rain_share": 0.201,
+   "pr_auc": 0.433,
+   "recall": 0.685,
    "precision": 0.364,
-   "days": 1408.0
+   "days": 1468.0
   },
   {
    "Location": "Wollongong",
-   "rain_share": 0.271,
-   "pr_auc": 0.436,
-   "recall": 0.644,
-   "precision": 0.379,
-   "days": 1438.0
+   "rain_share": 0.269,
+   "pr_auc": 0.435,
+   "recall": 0.702,
+   "precision": 0.365,
+   "days": 1424.0
   },
   {
    "Location": "Brisbane",
    "rain_share": 0.245,
-   "pr_auc": 0.437,
-   "recall": 0.733,
-   "precision": 0.37,
-   "days": 1483.0
+   "pr_auc": 0.438,
+   "recall": 0.77,
+   "precision": 0.355,
+   "days": 1476.0
   },
   {
    "Location": "Williamtown",
    "rain_share": 0.289,
-   "pr_auc": 0.449,
-   "recall": 0.714,
-   "precision": 0.4,
-   "days": 1465.0
+   "pr_auc": 0.456,
+   "recall": 0.703,
+   "precision": 0.386,
+   "days": 1445.0
   },
   {
    "Location": "Melbourne",
    "rain_share": 0.246,
-   "pr_auc": 0.468,
-   "recall": 0.722,
-   "precision": 0.402,
+   "pr_auc": 0.467,
+   "recall": 0.736,
+   "precision": 0.387,
    "days": 1489.0
-  },
-  {
-   "Location": "GoldCoast",
-   "rain_share": 0.281,
-   "pr_auc": 0.47,
-   "recall": 0.757,
-   "precision": 0.389,
-   "days": 1450.0
   },
   {
    "Location": "MountGinini",
    "rain_share": 0.298,
-   "pr_auc": 0.47,
-   "recall": 0.717,
-   "precision": 0.392,
-   "days": 1479.0
+   "pr_auc": 0.468,
+   "recall": 0.738,
+   "precision": 0.383,
+   "days": 1474.0
+  },
+  {
+   "Location": "NorahHead",
+   "rain_share": 0.311,
+   "pr_auc": 0.468,
+   "recall": 0.779,
+   "precision": 0.38,
+   "days": 1424.0
   },
   {
    "Location": "Watsonia",
    "rain_share": 0.253,
-   "pr_auc": 0.472,
-   "recall": 0.715,
-   "precision": 0.397,
-   "days": 1471.0
+   "pr_auc": 0.469,
+   "recall": 0.747,
+   "precision": 0.389,
+   "days": 1455.0
   },
   {
-   "Location": "NorahHead",
-   "rain_share": 0.312,
+   "Location": "GoldCoast",
+   "rain_share": 0.282,
    "pr_auc": 0.476,
-   "recall": 0.731,
-   "precision": 0.393,
-   "days": 1454.0
-  },
-  {
-   "Location": "NorfolkIsland",
-   "rain_share": 0.302,
-   "pr_auc": 0.476,
-   "recall": 0.861,
-   "precision": 0.393,
-   "days": 1478.0
+   "recall": 0.828,
+   "precision": 0.386,
+   "days": 1418.0
   },
   {
    "Location": "SydneyAirport",
-   "rain_share": 0.288,
-   "pr_auc": 0.482,
-   "recall": 0.712,
-   "precision": 0.386,
-   "days": 1473.0
+   "rain_share": 0.285,
+   "pr_auc": 0.48,
+   "recall": 0.758,
+   "precision": 0.375,
+   "days": 1465.0
+  },
+  {
+   "Location": "NorfolkIsland",
+   "rain_share": 0.3,
+   "pr_auc": 0.481,
+   "recall": 0.877,
+   "precision": 0.374,
+   "days": 1467.0
   },
   {
    "Location": "Sydney",
    "rain_share": 0.304,
-   "pr_auc": 0.487,
-   "recall": 0.758,
-   "precision": 0.388,
-   "days": 1481.0
-  },
-  {
-   "Location": "Ballarat",
-   "rain_share": 0.251,
-   "pr_auc": 0.507,
-   "recall": 0.741,
-   "precision": 0.424,
+   "pr_auc": 0.496,
+   "recall": 0.8,
+   "precision": 0.384,
    "days": 1476.0
   },
   {
    "Location": "Nuriootpa",
-   "rain_share": 0.196,
-   "pr_auc": 0.522,
-   "recall": 0.662,
-   "precision": 0.434,
-   "days": 1405.0
+   "rain_share": 0.176,
+   "pr_auc": 0.498,
+   "recall": 0.685,
+   "precision": 0.394,
+   "days": 1334.0
   },
   {
-   "Location": "Townsville",
-   "rain_share": 0.197,
-   "pr_auc": 0.535,
-   "recall": 0.727,
-   "precision": 0.434,
-   "days": 1469.0
+   "Location": "Ballarat",
+   "rain_share": 0.251,
+   "pr_auc": 0.512,
+   "recall": 0.77,
+   "precision": 0.412,
+   "days": 1468.0
   },
   {
    "Location": "CoffsHarbour",
-   "rain_share": 0.336,
-   "pr_auc": 0.551,
-   "recall": 0.799,
-   "precision": 0.44,
-   "days": 1465.0
+   "rain_share": 0.331,
+   "pr_auc": 0.535,
+   "recall": 0.837,
+   "precision": 0.425,
+   "days": 1446.0
   },
   {
-   "Location": "Cairns",
-   "rain_share": 0.327,
-   "pr_auc": 0.596,
-   "recall": 0.847,
-   "precision": 0.436,
-   "days": 1462.0
+   "Location": "Townsville",
+   "rain_share": 0.198,
+   "pr_auc": 0.537,
+   "recall": 0.751,
+   "precision": 0.432,
+   "days": 1459.0
   },
   {
    "Location": "PerthAirport",
    "rain_share": 0.189,
-   "pr_auc": 0.597,
-   "recall": 0.773,
-   "precision": 0.514,
+   "pr_auc": 0.592,
+   "recall": 0.801,
+   "precision": 0.487,
    "days": 1489.0
+  },
+  {
+   "Location": "Cairns",
+   "rain_share": 0.324,
+   "pr_auc": 0.597,
+   "recall": 0.838,
+   "precision": 0.425,
+   "days": 1443.0
   },
   {
    "Location": "PearceRAAF",
    "rain_share": 0.18,
-   "pr_auc": 0.599,
-   "recall": 0.729,
-   "precision": 0.489,
-   "days": 1476.0
+   "pr_auc": 0.605,
+   "recall": 0.735,
+   "precision": 0.475,
+   "days": 1464.0
   },
   {
    "Location": "Perth",
-   "rain_share": 0.198,
-   "pr_auc": 0.601,
-   "recall": 0.741,
-   "precision": 0.504,
-   "days": 1466.0
+   "rain_share": 0.199,
+   "pr_auc": 0.608,
+   "recall": 0.776,
+   "precision": 0.5,
+   "days": 1456.0
   },
   {
    "Location": "Albany",
-   "rain_share": 0.29,
-   "pr_auc": 0.624,
-   "recall": 0.809,
-   "precision": 0.484,
-   "days": 1461.0
+   "rain_share": 0.288,
+   "pr_auc": 0.625,
+   "recall": 0.835,
+   "precision": 0.474,
+   "days": 1455.0
   },
   {
    "Location": "Dartmoor",
-   "rain_share": 0.303,
-   "pr_auc": 0.629,
-   "recall": 0.792,
-   "precision": 0.505,
-   "days": 1460.0
+   "rain_share": 0.304,
+   "pr_auc": 0.632,
+   "recall": 0.8,
+   "precision": 0.496,
+   "days": 1432.0
   },
   {
    "Location": "Portland",
-   "rain_share": 0.329,
-   "pr_auc": 0.66,
-   "recall": 0.836,
-   "precision": 0.49,
-   "days": 1449.0
+   "rain_share": 0.327,
+   "pr_auc": 0.654,
+   "recall": 0.852,
+   "precision": 0.476,
+   "days": 1423.0
   },
   {
    "Location": "MountGambier",
-   "rain_share": 0.31,
+   "rain_share": 0.308,
    "pr_auc": 0.662,
-   "recall": 0.789,
-   "precision": 0.521,
-   "days": 1456.0
+   "recall": 0.801,
+   "precision": 0.509,
+   "days": 1433.0
   },
   {
    "Location": "Darwin",
    "rain_share": 0.28,
-   "pr_auc": 0.663,
-   "recall": 0.921,
-   "precision": 0.509,
+   "pr_auc": 0.667,
+   "recall": 0.945,
+   "precision": 0.505,
    "days": 1489.0
   },
   {
    "Location": "Walpole",
-   "rain_share": 0.327,
-   "pr_auc": 0.684,
-   "recall": 0.853,
-   "precision": 0.501,
-   "days": 1454.0
+   "rain_share": 0.329,
+   "pr_auc": 0.686,
+   "recall": 0.885,
+   "precision": 0.485,
+   "days": 1429.0
   },
   {
    "Location": "Witchcliffe",
    "rain_share": 0.268,
    "pr_auc": 0.715,
-   "recall": 0.912,
-   "precision": 0.509,
-   "days": 1323.0
+   "recall": 0.932,
+   "precision": 0.496,
+   "days": 1311.0
   }
  ],
  "recall_by_amount": [
   {
    "amount": "1\u20132 mm",
-   "days": 2943.0,
-   "recall": 0.6,
-   "mean_p": 0.307
+   "days": 2902.0,
+   "recall": 0.638,
+   "mean_p": 0.305
   },
   {
    "amount": "2\u20135 mm",
-   "days": 4358.0,
-   "recall": 0.65,
+   "days": 4297.0,
+   "recall": 0.686,
    "mean_p": 0.333
   },
   {
    "amount": "5\u201310 mm",
-   "days": 3312.0,
-   "recall": 0.695,
-   "mean_p": 0.36
+   "days": 3267.0,
+   "recall": 0.733,
+   "mean_p": 0.359
   },
   {
    "amount": "10\u201325 mm",
-   "days": 3145.0,
-   "recall": 0.734,
-   "mean_p": 0.382
+   "days": 3106.0,
+   "recall": 0.76,
+   "mean_p": 0.381
   },
   {
    "amount": "> 25 mm",
-   "days": 1468.0,
-   "recall": 0.803,
-   "mean_p": 0.409
+   "days": 1446.0,
+   "recall": 0.837,
+   "mean_p": 0.407
   }
  ],
  "confusion_lgb": [
   [
-   37035,
-   14950
+   35209,
+   16339
   ],
   [
-   4839,
-   10387
+   4255,
+   10763
   ]
  ],
  "weighted_mean_p": {
-  "weighted": 0.3859000092763923,
-  "unweighted": 0.21671017829031042,
-  "true_rate": 0.2265402984630492
+  "weighted": 0.3786044132789513,
+  "undersampled": 0.39384774142044104,
+  "unweighted": 0.214342175123638,
+  "true_rate": 0.2256106721148935
  },
+ "undersample_train_rows": 78163,
  "sensitivity": [
   {
    "setting": "no missing flags",
-   "log_loss": 0.4466,
-   "brier": 0.1445,
-   "pr_auc": 0.5068,
-   "threshold": 0.22,
-   "precision": 0.4031,
-   "recall": 0.7037,
-   "f1": 0.5126
+   "log_loss": 0.4461,
+   "brier": 0.1443,
+   "pr_auc": 0.5046,
+   "threshold": 0.21,
+   "precision": 0.3952,
+   "recall": 0.7193,
+   "f1": 0.5101
   },
   {
    "setting": "class weight 3, threshold 0.5",
-   "log_loss": 0.5194,
-   "brier": 0.1748,
-   "pr_auc": 0.5055,
+   "log_loss": 0.5133,
+   "brier": 0.1723,
+   "pr_auc": 0.5056,
    "threshold": 0.5,
-   "precision": 0.431,
-   "recall": 0.6281,
-   "f1": 0.5112
+   "precision": 0.4348,
+   "recall": 0.6163,
+   "f1": 0.5099
+  },
+  {
+   "setting": "undersample no-rain days to 1/3, threshold 0.5",
+   "log_loss": 0.5288,
+   "brier": 0.1785,
+   "pr_auc": 0.5005,
+   "threshold": 0.5,
+   "precision": 0.4224,
+   "recall": 0.6374,
+   "f1": 0.5081
   },
   {
    "setting": "baseline design (flags, no weight, thr from val)",
-   "log_loss": 0.447,
-   "brier": 0.1447,
-   "pr_auc": 0.5053,
-   "threshold": 0.23,
-   "precision": 0.41,
-   "recall": 0.6822,
-   "f1": 0.5121
+   "log_loss": 0.4456,
+   "brier": 0.1442,
+   "pr_auc": 0.5056,
+   "threshold": 0.21,
+   "precision": 0.3971,
+   "recall": 0.7167,
+   "f1": 0.5111
   },
   {
    "setting": "cost ratio 2:1 (theory thr 0.33)",
-   "log_loss": 0.447,
-   "brier": 0.1447,
-   "pr_auc": 0.5053,
-   "threshold": 0.28,
-   "precision": 0.4489,
-   "recall": 0.5807,
-   "f1": 0.5063
+   "log_loss": 0.4456,
+   "brier": 0.1442,
+   "pr_auc": 0.5056,
+   "threshold": 0.31,
+   "precision": 0.4725,
+   "recall": 0.5147,
+   "f1": 0.4927
   },
   {
    "setting": "cost ratio 5:1 (theory thr 0.17)",
-   "log_loss": 0.447,
-   "brier": 0.1447,
-   "pr_auc": 0.5053,
+   "log_loss": 0.4456,
+   "brier": 0.1442,
+   "pr_auc": 0.5056,
    "threshold": 0.14,
-   "precision": 0.3391,
-   "recall": 0.8639,
-   "f1": 0.487
+   "precision": 0.342,
+   "recall": 0.8592,
+   "f1": 0.4892
   }
  ],
  "deployment_2026": [
@@ -960,11 +983,11 @@
    "roc_auc": NaN,
    "pr_auc": NaN,
    "threshold": NaN,
-   "accuracy": 0.75,
+   "accuracy": 0.7495,
    "precision": 0.0,
    "recall": 0.0,
    "f1": 0.0,
-   "cost_per_day": 0.75
+   "cost_per_day": 0.7514
   },
   {
    "model": "Persistence (rain today)",
@@ -973,11 +996,11 @@
    "roc_auc": NaN,
    "pr_auc": NaN,
    "threshold": NaN,
-   "accuracy": 0.6702,
+   "accuracy": 0.6695,
    "precision": 0.3397,
    "recall": 0.3384,
    "f1": 0.339,
-   "cost_per_day": 0.6606
+   "cost_per_day": 0.6619
   },
   {
    "model": "Humidity3pm > 60",
@@ -986,139 +1009,139 @@
    "roc_auc": NaN,
    "pr_auc": NaN,
    "threshold": NaN,
-   "accuracy": 0.6378,
-   "precision": 0.3455,
+   "accuracy": 0.6381,
+   "precision": 0.3465,
    "recall": 0.5019,
-   "f1": 0.4093,
-   "cost_per_day": 0.6112
+   "f1": 0.4099,
+   "cost_per_day": 0.6114
   },
   {
    "model": "LogReg",
-   "log_loss": 0.5325,
-   "brier": 0.1759,
-   "roc_auc": 0.6711,
-   "pr_auc": 0.3978,
-   "threshold": 0.2,
-   "accuracy": 0.6084,
-   "precision": 0.3501,
-   "recall": 0.6616,
-   "f1": 0.4579,
-   "cost_per_day": 0.5608
+   "log_loss": 0.5335,
+   "brier": 0.1763,
+   "roc_auc": 0.6736,
+   "pr_auc": 0.3997,
+   "threshold": 0.21,
+   "accuracy": 0.6476,
+   "precision": 0.3764,
+   "recall": 0.6198,
+   "f1": 0.4684,
+   "cost_per_day": 0.5429
   },
   {
    "model": "LightGBM",
-   "log_loss": 0.476,
-   "brier": 0.1559,
-   "roc_auc": 0.7706,
-   "pr_auc": 0.5207,
-   "threshold": 0.23,
-   "accuracy": 0.7015,
-   "precision": 0.4408,
-   "recall": 0.7224,
-   "f1": 0.5476,
-   "cost_per_day": 0.4373
+   "log_loss": 0.4764,
+   "brier": 0.1558,
+   "roc_auc": 0.7705,
+   "pr_auc": 0.5235,
+   "threshold": 0.21,
+   "accuracy": 0.6924,
+   "precision": 0.4342,
+   "recall": 0.7529,
+   "f1": 0.5508,
+   "cost_per_day": 0.4314
   },
   {
    "model": "MLP",
-   "log_loss": 0.4721,
-   "brier": 0.1531,
-   "roc_auc": 0.7775,
-   "pr_auc": 0.5272,
-   "threshold": 0.23,
-   "accuracy": 0.7053,
-   "precision": 0.4467,
-   "recall": 0.749,
-   "f1": 0.5597,
-   "cost_per_day": 0.4202
+   "log_loss": 0.474,
+   "brier": 0.1538,
+   "roc_auc": 0.7732,
+   "pr_auc": 0.525,
+   "threshold": 0.24,
+   "accuracy": 0.7105,
+   "precision": 0.4518,
+   "recall": 0.73,
+   "f1": 0.5581,
+   "cost_per_day": 0.4248
   },
   {
    "model": "GRU",
-   "log_loss": 0.4748,
-   "brier": 0.1546,
-   "roc_auc": 0.7702,
-   "pr_auc": 0.5257,
+   "log_loss": 0.4774,
+   "brier": 0.1554,
+   "roc_auc": 0.7684,
+   "pr_auc": 0.5196,
    "threshold": 0.24,
-   "accuracy": 0.7101,
-   "precision": 0.449,
-   "recall": 0.7034,
-   "f1": 0.5481,
-   "cost_per_day": 0.4382
+   "accuracy": 0.7057,
+   "precision": 0.4442,
+   "recall": 0.6958,
+   "f1": 0.5422,
+   "cost_per_day": 0.4467
   },
   {
    "model": "Transformer",
-   "log_loss": 0.4763,
-   "brier": 0.1554,
-   "roc_auc": 0.7745,
-   "pr_auc": 0.5149,
-   "threshold": 0.23,
-   "accuracy": 0.7053,
-   "precision": 0.4457,
-   "recall": 0.7338,
-   "f1": 0.5546,
-   "cost_per_day": 0.4278
+   "log_loss": 0.4785,
+   "brier": 0.156,
+   "roc_auc": 0.7703,
+   "pr_auc": 0.5123,
+   "threshold": 0.27,
+   "accuracy": 0.7286,
+   "precision": 0.4707,
+   "recall": 0.673,
+   "f1": 0.554,
+   "cost_per_day": 0.4352
   },
   {
    "model": "LightGBM retrained to 2026",
-   "log_loss": 0.4685,
-   "brier": 0.1529,
+   "log_loss": 0.4679,
+   "brier": 0.1522,
    "roc_auc": 0.7812,
-   "pr_auc": 0.5333,
-   "threshold": 0.23,
-   "accuracy": 0.6987,
-   "precision": 0.4397,
-   "recall": 0.749,
-   "f1": 0.5541,
-   "cost_per_day": 0.4268
+   "pr_auc": 0.5438,
+   "threshold": 0.21,
+   "accuracy": 0.6867,
+   "precision": 0.4307,
+   "recall": 0.7795,
+   "f1": 0.5548,
+   "cost_per_day": 0.4238
   }
  ],
- "deployment_2026_days": 1052,
- "deployment_2026_rain_share": 0.25,
+ "deployment_2026_days": 1050,
+ "deployment_2026_rain_share": 0.25047619047619046,
  "deployment_2026_by_city": [
   {
    "city": "Sydney",
    "days": 212,
    "rain_share": 0.321,
-   "pr_auc": 0.552,
+   "pr_auc": 0.538,
    "recall": 0.794
   },
   {
    "city": "Melbourne",
    "days": 212,
    "rain_share": 0.236,
-   "pr_auc": 0.441,
-   "recall": 0.7
+   "pr_auc": 0.472,
+   "recall": 0.68
   },
   {
    "city": "Brisbane",
-   "days": 207,
-   "rain_share": 0.285,
-   "pr_auc": 0.556,
-   "recall": 0.78
+   "days": 206,
+   "rain_share": 0.286,
+   "pr_auc": 0.58,
+   "recall": 0.864
   },
   {
    "city": "Perth",
    "days": 212,
    "rain_share": 0.241,
-   "pr_auc": 0.584,
-   "recall": 0.686
+   "pr_auc": 0.574,
+   "recall": 0.725
   },
   {
    "city": "Canberra",
-   "days": 209,
-   "rain_share": 0.167,
-   "pr_auc": 0.443,
-   "recall": 0.571
+   "days": 208,
+   "rain_share": 0.168,
+   "pr_auc": 0.436,
+   "recall": 0.629
   }
  ],
  "times_s": {
-  "LogReg_train_s": 0.32,
-  "LightGBM_train_s": 7.1,
-  "MLP_train_s_per_seed": 3.75,
-  "GRU_train_s_per_seed": 8.91,
-  "Transformer_train_s_per_seed": 47.76
+  "LogReg_train_s": 0.31,
+  "LightGBM_train_s": 9.52,
+  "MLP_train_s_per_seed": 3.32,
+  "GRU_train_s_per_seed": 11.17,
+  "Transformer_train_s_per_seed": 47.89
  },
  "latency_ms": {
-  "LogReg": 1.81,
+  "LogReg": 1.79,
   "LightGBM": 0.7,
   "MLP": 0.04,
   "GRU": 0.08,

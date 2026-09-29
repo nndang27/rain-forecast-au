@@ -88,8 +88,13 @@ os.makedirs("data", exist_ok=True); os.makedirs("figures", exist_ok=True); os.ma
 plt.rcParams.update({"figure.dpi": 110, "savefig.dpi": 200, "font.size": 10, "axes.grid": True, "grid.alpha": 0.3})
 RESULTS = {}   # every number reported in the journal is stored here and saved to results/results.json
 
-print("python", sys.version.split()[0], "| pandas", pd.__version__, "| numpy", np.__version__,
-      "| lightgbm", lgb.__version__, "| torch", torch.__version__)
+import sklearn, matplotlib
+VERSIONS = {"python": sys.version.split()[0], "pandas": pd.__version__, "numpy": np.__version__, "scikit-learn": sklearn.__version__,
+            "lightgbm": lgb.__version__, "torch": torch.__version__, "matplotlib": matplotlib.__version__, "requests": requests.__version__}
+RESULTS["versions"] = VERSIONS
+print(VERSIONS)
+# The journal numbers were produced with the versions in requirements.txt. On Colab I do not force these versions,
+# because re-installing core packages there can break the runtime; small differences in the last digit are possible.
 
 # %% [markdown]
 # ## 2. Data
@@ -242,7 +247,13 @@ plt.tight_layout(); plt.savefig("figures/fig1_timeline.png"); plt.show()
 # **Training data:** pairs (input vector for day *t*, label = 1 if Rainfall of day *t+2* > 1 mm, else 0).
 # For the GRU and Transformer models, the input is the sequence of the same vectors for days *t−6 … t*.
 #
-# For comparison I also build the **"standard" Kaggle task**: all columns of day *t* as they are, and the label `RainTomorrow`.
+# **A data-quality rule for the label.** The BOM notes warn that when a day's rainfall is missing, the next value
+# "has been accumulated over several days rather than the normal one day". A 3-day total above 1 mm is not the same event as
+# one rainy day, so I **remove a label when the rainfall of day *t+1* is missing** (then the day *t+2* value may be a multi-day
+# total). This removes about 1% of the labels. The same rule is applied to the 2026 deployment data.
+#
+# For comparison I also build the **"standard" Kaggle task**: all columns of day *t* as they are, and the label `RainTomorrow`
+# (kept exactly as in the public dataset, because its purpose is to reproduce the public task).
 
 # %%
 NUM_BASE = ["MinTemp", "Rainfall", "Evaporation", "Temp9am", "Humidity9am", "Cloud9am", "WindSpeed9am", "Pressure9am",
@@ -266,7 +277,10 @@ def add_features(df):
     g = df.groupby("Location")
     df["rain_t1"] = g["Rainfall"].shift(-1)             # rain 9am t -> 9am t+1 (Kaggle window)
     df["rain_t2"] = g["Rainfall"].shift(-2)             # rain 9am t+1 -> 9am t+2 (our window)
-    df["y_honest"] = np.where(df.rain_t2.notna(), (df.rain_t2 > 1).astype(float), np.nan)
+    # BOM note: when a day's rainfall is missing, the next value may be the total of several days.
+    # So rain_t2 is only a clean one-day total if rain_t1 (the day before) was recorded.
+    df["label_accumulated_risk"] = df.rain_t2.notna() & df.rain_t1.isna()
+    df["y_honest"] = np.where(df.rain_t2.notna() & df.rain_t1.notna(), (df.rain_t2 > 1).astype(float), np.nan)
     df["y_standard"] = np.where(df.rain_t1.notna(), (df.rain_t1 > 1).astype(float), np.nan)
     for c in ["MaxTemp", "Sunshine", "WindGustSpeed", "WindGustDir"]:
         df[c + "_lag1"] = g[c].shift(1)                  # yesterday's value is complete at 3:30 pm today
@@ -309,7 +323,10 @@ full = full[~full.row_missing].reset_index(drop=True)
 chk = raw.merge(full[["Location", "Date", "y_standard"]], on=["Location", "Date"])
 chk = chk[chk.RainTomorrow.notna() & chk.y_standard.notna()]
 print("y_standard matches RainTomorrow:", f"{((chk.RainTomorrow == 'Yes') == (chk.y_standard == 1)).mean():.2%}")
+print("Labels removed because the day before the target day has no rainfall record (possible multi-day total):",
+      int(full.label_accumulated_risk.sum()))
 print("Rows with the honest label:", int(full.y_honest.notna().sum()), "| positive share:", round(full.y_honest.mean(), 3))
+RESULTS["data"]["labels_removed_accumulated"] = int(full.label_accumulated_risk.sum())
 RESULTS["data"]["rows_honest"] = int(full.y_honest.notna().sum())
 RESULTS["data"]["positive_share_honest"] = float(full.y_honest.mean())
 
@@ -763,7 +780,7 @@ plt.tight_layout(); plt.savefig("figures/fig10_attention.png"); plt.show()
 print("attention from day t:", dict(zip(labels_days, att_all.round(3))))
 
 # %% [markdown]
-# The attention is almost flat: every day gets between about 0.13 and 0.15, close to the equal share 1/7 = 0.143, and the
+# The attention is almost flat: every day gets between about 0.14 and 0.15, close to the equal share 1/7 = 0.143, and the
 # pattern is nearly the same for rainy and dry target days. In other words, the Transformer mostly takes an average of the
 # week instead of picking out special days. This agrees with the GRU result: for a target two days ahead, the recent history
 # adds little information beyond today's readings.
@@ -847,7 +864,7 @@ main.round(3)
 #   are **not** better (PR-AUC about 0.48 and 0.49).
 #   Logistic Regression is clearly weaker (PR-AUC 0.42), so a linear boundary is not enough.
 # - With the default threshold 0.5, LightGBM has the highest accuracy of all models, but it catches only about 22% of the rain days.
-#   The cost-based threshold (0.23) catches about 68%. The threshold matters as much as the model.
+#   The cost-based threshold (0.21) catches about 72%. The threshold matters as much as the model.
 
 
 # %% [markdown]
@@ -998,7 +1015,7 @@ print(RESULTS["unseen_stations"])
 
 # %% [markdown]
 # For stations the model has never seen, PR-AUC drops from about 0.47 to about 0.44, and the spread between folds is
-# much larger (± 0.06 instead of ± 0.01). The model can be used for a new station, but its quality is less predictable,
+# much larger (± 0.05 instead of ± 0.01). The model can be used for a new station, but its quality is less predictable,
 # so a new station should be monitored for some months before its forecasts are trusted.
 
 
@@ -1051,7 +1068,7 @@ plt.tight_layout(); plt.savefig("figures/fig8_recall_by_amount.png"); plt.show()
 by_amount.round(3)
 
 # %% [markdown]
-# Recall grows with the amount of rain: about 60% of the 1–2 mm days are caught, but about 80% of the days with more than 25 mm.
+# Recall grows with the amount of rain: about 64% of the 1–2 mm days are caught, but about 84% of the days with more than 25 mm.
 # This is good news for users, but it also shows a gap between the loss and the real objective: cross-entropy treats a
 # 1.2 mm day and a 40 mm day as the same "Yes", while a user cares much more about the 40 mm day.
 
@@ -1073,7 +1090,8 @@ plt.tight_layout(); plt.savefig("figures/fig9_confusion.png"); plt.show()
 # ### 10.5 Sensitivity to my own design choices
 # I change one choice at a time (LightGBM, validation → test) and check whether the conclusions stay the same.
 # 1. **Missing flags removed** – does keeping "missingness" help?
-# 2. **Class weights** (`scale_pos_weight` = 3) instead of moving the threshold – two different answers to the cost problem.
+# 2. **Class weights** (`scale_pos_weight` = 3) or **resampling** (keep only one in three no-rain days in the training data)
+#    instead of moving the threshold. The FAQ names these three answers to class imbalance; I compare all three.
 # 3. **Cost ratio** 2 : 1 and 5 : 1 instead of 3 : 1 – how the threshold and the recall move.
 
 # %%
@@ -1091,7 +1109,16 @@ sens.append({**evaluate(y[te], pt, best_cost_threshold(y[va], pv)[0]), "setting"
 m = lgb.LGBMClassifier(**{**LGB_PARAMS, "n_estimators": BEST_ITER, "scale_pos_weight": 3.0}).fit(lgb_frame(Xh.iloc[tr], data.iloc[tr]), y[tr])
 pt_w = m.predict_proba(lgb_frame(Xh.iloc[te], data.iloc[te]))[:, 1]
 sens.append({**evaluate(y[te], pt_w, 0.5), "setting": "class weight 3, threshold 0.5"})
-RESULTS["weighted_mean_p"] = {"weighted": float(pt_w.mean()), "unweighted": float(P["test"]["LightGBM"].mean()), "true_rate": float(y[te].mean())}
+# Resampling: keep all rain days and a random third of the no-rain days (training years only). This changes the class
+# balance seen in training by the same factor 3 as the class weight, so the natural threshold is again 0.5.
+rng_rs = np.random.RandomState(SEED)
+keep = np.concatenate([tr[y[tr] == 1], rng_rs.choice(tr[y[tr] == 0], size=int((y[tr] == 0).sum() / 3), replace=False)])
+m = lgb.LGBMClassifier(**{**LGB_PARAMS, "n_estimators": BEST_ITER}).fit(lgb_frame(Xh.iloc[keep], data.iloc[keep]), y[keep])
+pt_rs = m.predict_proba(lgb_frame(Xh.iloc[te], data.iloc[te]))[:, 1]
+sens.append({**evaluate(y[te], pt_rs, 0.5), "setting": "undersample no-rain days to 1/3, threshold 0.5"})
+RESULTS["weighted_mean_p"] = {"weighted": float(pt_w.mean()), "undersampled": float(pt_rs.mean()),
+                              "unweighted": float(P["test"]["LightGBM"].mean()), "true_rate": float(y[te].mean())}
+RESULTS["undersample_train_rows"] = int(len(keep))
 sens.append({**evaluate(y[te], P["test"]["LightGBM"], THR["LightGBM"]), "setting": "baseline design (flags, no weight, thr from val)"})
 
 for cfn in [2.0, 5.0]:
@@ -1104,13 +1131,14 @@ RESULTS["sensitivity"] = sens.round(4).to_dict(orient="records")
 sens.round(3)
 
 # %% [markdown]
-# - Removing the missing flags does not change the result (PR-AUC 0.507 vs 0.505). LightGBM already handles missing values in its own way,
+# - Removing the missing flags does not change the result (PR-AUC 0.505 vs 0.506). LightGBM already handles missing values in its own way,
 #   so the flags are not needed for this model, but they are harmless.
-# - Class weights and threshold moving are two ways to express the same cost. Weight 3 pushes all probabilities up, so the
-#   probabilities are no longer calibrated (the log-loss becomes worse). Moving the threshold keeps calibrated probabilities,
+# - Class weights, resampling and threshold moving are three ways to express the same cost. All three give almost the same
+#   ranking (PR-AUC about 0.50–0.51). But weight 3 and undersampling push all probabilities up (average p about 0.38–0.39
+#   while the true rain rate is 0.23), so the probabilities are no longer calibrated and the log-loss becomes worse (0.51–0.53 vs 0.45). Moving the threshold keeps calibrated probabilities,
 #   which a user can also read directly ("30% chance of rain"). I therefore keep the threshold approach.
 # - The cost ratio controls the trade-off directly: a ratio of 5:1 catches about 86% of rain days with more false alarms,
-#   a ratio of 2:1 catches about 58% with fewer. The chosen thresholds are close to the theory value 1/(1+ratio).
+#   a ratio of 2:1 catches about 52% with fewer. The chosen thresholds are close to the theory value 1/(1+ratio).
 
 
 # %% [markdown]
@@ -1203,10 +1231,10 @@ print(dep_city.round(3).to_string(index=False))
 dep_tab.round(3)
 
 # %% [markdown]
-# **Deployment result.** On 1,052 new station-days from 2026 the models keep their test-year quality (LightGBM PR-AUC 0.52,
-# MLP 0.53, GRU 0.53, Transformer 0.52) and clearly beat persistence and the humidity rule in cost. The models were trained only up to 2019, so they
+# **Deployment result.** On 1,050 new station-days from 2026 the models keep their test-year quality (LightGBM PR-AUC 0.52,
+# MLP 0.53, GRU 0.52, Transformer 0.51) and clearly beat persistence and the humidity rule in cost. The models were trained only up to 2019, so they
 # are more than six years old, and they still work. Retraining LightGBM up to January 2026 gives only a small gain
-# (PR-AUC 0.53), which suggests no strong drift yet. Canberra is the weakest city: it is the driest of the five
+# (PR-AUC 0.54), which suggests no strong drift yet. Canberra is the weakest city: it is the driest of the five
 # (17% rain days). Melbourne is second weakest; its 2026 BOM file has no cloud readings, so the model relies on the missing flags there.
 
 

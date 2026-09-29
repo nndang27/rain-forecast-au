@@ -1,0 +1,9 @@
+# Versions used to produce the results in the journal (run on macOS, Python 3.11.8).
+# Google Colab already has all of these packages; its versions may differ slightly.
+pandas==2.2.2
+numpy==2.4.3
+scikit-learn==1.8.0
+lightgbm==4.6.0
+torch==2.11.0
+matplotlib==3.9.3
+requests==2.32.5
