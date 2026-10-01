@@ -1134,18 +1134,18 @@
   }
  ],
  "times_s": {
-  "LogReg_train_s": 0.32,
-  "LightGBM_train_s": 8.74,
-  "MLP_train_s_per_seed": 3.64,
-  "GRU_train_s_per_seed": 12.08,
-  "Transformer_train_s_per_seed": 48.48
+  "LogReg_train_s": 0.31,
+  "LightGBM_train_s": 8.78,
+  "MLP_train_s_per_seed": 3.73,
+  "GRU_train_s_per_seed": 11.99,
+  "Transformer_train_s_per_seed": 50.3
  },
  "latency_ms": {
-  "LogReg": 1.86,
-  "LightGBM": 0.75,
+  "LogReg": 2.02,
+  "LightGBM": 0.81,
   "MLP": 0.04,
-  "GRU": 0.08,
-  "Transformer": 0.15
+  "GRU": 0.09,
+  "Transformer": 0.16
  },
  "history": [
   {
