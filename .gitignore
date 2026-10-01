@@ -3,3 +3,5 @@ tools/
 *.pdf
 __pycache__/
 .ipynb_checkpoints/
+old_versions/
+.DS_Store

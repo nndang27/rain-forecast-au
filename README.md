@@ -27,3 +27,9 @@ The notebook downloads its data from the original sources and uses the copies in
 - Williams, G. weatherAUS, rattle project: https://rattle.togaware.com/weatherAUS.csv
 - Bureau of Meteorology, Daily Weather Observations: http://www.bom.gov.au/climate/dwo/
   (© Commonwealth of Australia, Bureau of Meteorology)
+
+## Image credits
+
+- `figures/web/boosting.png`: Sirakorn, "Ensemble Boosting", Wikimedia Commons, CC BY-SA 4.0.
+- `figures/web/transformer.png`, `figures/web/gru_cell.png`: Zhang, Lipton, Li & Smola, *Dive into Deep Learning* (d2l.ai), CC BY-SA 4.0.
+- All other figures were made for this project.

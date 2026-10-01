@@ -20,34 +20,40 @@
 # downloads the data from the original public sources, prepares the data, trains the models and produces every
 # number and figure used in my journal.
 #
-# **The task in one sentence.** At 3:30 pm on day *t*, a weather station has its morning (9 am) and afternoon (3 pm)
-# readings. The system must output the probability that **more than 1 mm of rain falls during the next rain day**
-# (9 am on day *t+1* to 9 am on day *t+2*).
+# **Structure** (the same as the journal)
+# 1. Problem statement
+# 2. Data collection
+# 3. Data preprocessing
+# 4. Model implementation: Logistic Regression, LightGBM, and three deep learning models (MLP, GRU, Transformer)
+# 5. Model training
+# 6. Model evaluation: baselines, threshold, main results, timing leak, attention, reliability, 2026 deployment test, cost
+# 7. Conclusion
 #
-# **Why this is not the usual Kaggle task.** The popular "Rain in Australia" target (`RainTomorrow`) looks like the same
-# question, but because of how the Bureau of Meteorology (BOM) records rainfall, it actually covers
-# 9 am *today* to 9 am *tomorrow*. Several input columns are measured inside that window. Section 3 shows this
-# and measures how much it inflates the results.
-#
-# **Structure**
-# 1. Setup
-# 2. Data: download, check and describe
-# 3. Feasibility check 1: leakage and the timing of every feature
-# 4. Task definition (inputs and outputs for training and deployment)
-# 5. Preprocessing
-# 6. Validation design (time-based split)
-# 7. Baselines (the "incumbent" rules)
-# 8. Models: Logistic Regression, LightGBM, MLP, GRU and Transformer (the last three are deep learning; GRU and Transformer use a 7-day history)
-# 9. From probability to decision: loss vs. task objective, threshold by cost
-# 10. Reliability: random vs. time split, year-by-year evaluation, unseen cities, per-city errors, sensitivity
-# 11. Deployment test on real 2026 data downloaded from BOM (data the models have never seen)
-# 12. Cost of training and prediction
-# 13. Summary of results
-#
-# Runtime on Google Colab (CPU): about 10–15 minutes in total.
+# Runtime on Google Colab (CPU): about 15 minutes in total.
 
 # %% [markdown]
-# ## 1. Setup
+# ## 1. Problem statement
+#
+# **Problem.** Many daily decisions depend on rain in the next day: outdoor events, farm work, construction, or just taking an
+# umbrella. Official forecasts come from large physical weather models. A small model that uses only one station's own readings
+# is cheap and can run anywhere readings exist.
+#
+# **Objective.** At **3:30 pm on day *t***, after the 3 pm reading, output the probability that **more than 1 mm of rain falls
+# during the next rain day** (9 am on day *t+1* to 9 am on day *t+2*), and turn it into a yes/no decision.
+#
+# **Why this is not the usual Kaggle task.** The popular "Rain in Australia" target (`RainTomorrow`) looks like the same
+# question, but because of how the Bureau of Meteorology (BOM) records rainfall, it actually covers 9 am *today* to 9 am
+# *tomorrow*. Several input columns are measured inside that window. Section 3.1 shows this and Section 6.5 measures how much it
+# inflates the results.
+#
+# **Research question.** How well can rain on the next rain day be predicted from one station's own readings when only information
+# available at 3:30 pm is used, and how much of the accuracy reported for the public task comes from information that is not
+# available at that time?
+
+# %% [markdown]
+# ## 2. Data collection
+#
+# ### 2.1 Setup
 # All libraries below are pre-installed on Google Colab. The `pip` line only makes sure LightGBM is present when the
 # notebook is run somewhere else. I fix all random seeds so that the numbers in the journal can be reproduced.
 
@@ -97,14 +103,14 @@ print(VERSIONS)
 # because re-installing core packages there can break the runtime; small differences in the last digit are possible.
 
 # %% [markdown]
-# ## 2. Data
+# ### 2.2 Download the data
 # **Main source.** `weatherAUS.csv` from the `rattle` project (Togaware). This is the original source of the Kaggle
 # dataset "Rain in Australia", but it is longer: it runs from November 2007 to January 2026, while the Kaggle copy stops
 # in 2017. The observations come from the BOM *Daily Weather Observations* (© Commonwealth of Australia, Bureau of Meteorology).
 #
 # The file is updated from time to time, so I **cut the data at 30 January 2026**. This makes the results reproducible even if new rows are added later.
 #
-# **Second source (Section 11).** BOM monthly CSV files for Sydney, Melbourne, Brisbane, Perth and Canberra,
+# **Second source (Section 6.8).** BOM monthly CSV files for Sydney, Melbourne, Brisbane, Perth and Canberra,
 # January–September 2026. They are downloaded directly from the BOM website.
 #
 # If a download fails (for example, a website blocks the request), the notebook falls back to a snapshot copy.
@@ -141,6 +147,7 @@ print("dates:", raw.Date.min().date(), "to", raw.Date.max().date(), "| locations
 raw.head(3)
 
 # %% [markdown]
+# ### 2.3 Data card
 # A short data card. I only show what is used later in the design (no general EDA):
 # the class balance (it decides the metrics), the missing values (they decide the preprocessing) and
 # the number of rows per year (it shows a gap in 2016 that affects the time split).
@@ -161,7 +168,7 @@ RESULTS["data"] = {"rows": int(len(raw)), "locations": int(raw.Location.nunique(
 # %% [markdown]
 # **Missing values are not random.** Sunshine, Evaporation and Cloud are missing because many stations do not have
 # those instruments. So "missing" carries information about the station. I keep this information with missing-value flags
-# instead of hiding it (Section 5).
+# instead of hiding it (Section 3.3).
 
 # %%
 miss_by_loc = raw.groupby("Location")[["Sunshine", "Evaporation", "Cloud3pm"]].apply(lambda d: d.isna().mean())
@@ -170,7 +177,13 @@ print("Stations where Sunshine is missing on less than 10% of days:", int((miss_
 RESULTS["data"]["stations_no_sunshine"] = int((miss_by_loc.Sunshine > 0.95).sum())
 
 # %% [markdown]
-# ## 3. Feasibility check 1: leakage and the timing of every feature
+# ## 3. Data preprocessing
+# The steps follow the order in which the data is used: first check which columns may be used at all (leakage and timing),
+# then build the label and the inputs, then clean and scale, then split by time, and finally build the 7-day sequences for the
+# GRU and the Transformer.
+
+# %% [markdown]
+# ### 3.1 Leakage and the timing of every feature
 #
 # A feature can only be used if its value is **known at the moment the prediction is made**.
 # I check this in two steps.
@@ -229,12 +242,12 @@ ax.set_title("Observation windows and the two possible targets"); ax.grid(False)
 plt.tight_layout(); plt.savefig("figures/fig1_timeline.png"); plt.show()
 
 # %% [markdown]
-# ## 4. Task definition
+# ### 3.2 Labels and input features (the system interface)
 #
 # **Prediction time:** 3:30 pm on day *t*, after the 3 pm reading.
 #
 # **Output (deployment):** a probability *p* in [0, 1] that the rainfall recorded at 9 am on day *t+2* is more than 1 mm.
-# A decision rule (Section 9) turns *p* into "Rain" or "No rain".
+# A decision rule (Section 6.3) turns *p* into "Rain" or "No rain".
 #
 # **Input (deployment), one vector per station per day.** Only values that are known at 3:30 pm:
 # - today's readings to 9 am: `MinTemp`, `Rainfall`, `Evaporation`
@@ -331,7 +344,7 @@ RESULTS["data"]["rows_honest"] = int(full.y_honest.notna().sum())
 RESULTS["data"]["positive_share_honest"] = float(full.y_honest.mean())
 
 # %% [markdown]
-# ## 5. Preprocessing
+# ### 3.3 Cleaning, encoding and scaling
 #
 # All statistics (medians, means, standard deviations, station list) are learned **from the training years only** and then
 # applied to validation, test and 2026 data. Learning them from all years would leak future information.
@@ -365,17 +378,17 @@ class Prep:
         return oh
 
 # %% [markdown]
-# ## 6. Validation design
+# ### 3.4 Train / validation / test split by time
 #
 # The model will be used to predict the **future**, so the split follows time. I also avoid a random split on purpose,
-# because days that are next to each other in time have very similar weather (Section 10.1 measures the effect).
+# because days that are next to each other in time have very similar weather (Section 6.7 measures the effect).
 #
 # | Part | Prediction days | Used for |
 # |---|---|---|
 # | Train | 2008 – 2019 | fitting the models |
 # | Validation | 2020 – 2021 | early stopping, choosing the threshold, comparing settings |
 # | Test | 2022 – 28 Jan 2026 | final numbers, used **once** |
-# | Deployment test | Feb – Aug 2026, 5 cities, new BOM files | Section 11 |
+# | Deployment test | Feb – Aug 2026, 5 cities, new BOM files | Section 6.8 |
 #
 # The 2016 gap (only a few stations recorded) sits inside the training period, so it does not break the split.
 
@@ -396,86 +409,53 @@ prep = Prep().fit(Xh[data.split == "train"], data.Location[data.split == "train"
 idx = {s: np.where(data.split.values == s)[0] for s in ["train", "val", "test"]}
 y = data.y_honest.values.astype(int)
 print("number of input features:", len(prep.cols), "+ station")
-
-# %% [markdown]
-# ## Evaluation tools
-#
-# The **training loss** of every model is the binary cross-entropy (log-loss):
-# $L = -[y\log p + (1-y)\log(1-p)]$. From Module 3, minimising it makes *p* close to the true probability
-# of rain (it minimises the KL divergence between the true and the predicted distributions).
-#
-# The **task objective** is different. A user needs a yes/no decision, and a missed rain day costs more than a false alarm.
-# I report:
-# - **log-loss** (the same quantity the models are trained on) and the **Brier score** (probability quality),
-# - **PR-AUC** (average precision), the main ranking metric. With about 22% rainy days it is more informative than ROC-AUC or accuracy,
-# - at a chosen threshold: **recall** (share of rain days caught), **precision**, **F1** and the **expected cost per day**,
-#   with cost 3 for a missed rain day (FN) and 1 for a false alarm (FP). Section 9 explains this choice.
-#
-# Accuracy is shown only to demonstrate why it is not useful here.
-
-# %%
-C_FN, C_FP = 3.0, 1.0
-
-def evaluate(y_true, p, thr=0.5, name=""):
-    y_true = np.asarray(y_true).astype(int); p = np.clip(np.asarray(p, dtype=float), 1e-6, 1 - 1e-6)
-    yhat = (p >= thr).astype(int)
-    tn, fp, fn, tp = confusion_matrix(y_true, yhat, labels=[0, 1]).ravel()
-    return {"model": name, "log_loss": log_loss(y_true, p), "brier": brier_score_loss(y_true, p),
-            "roc_auc": roc_auc_score(y_true, p), "pr_auc": average_precision_score(y_true, p),
-            "threshold": thr, "accuracy": accuracy_score(y_true, yhat), "precision": precision_score(y_true, yhat, zero_division=0),
-            "recall": recall_score(y_true, yhat), "f1": f1_score(y_true, yhat), "cost_per_day": (C_FN * fn + C_FP * fp) / len(y_true)}
-
-def evaluate_rule(y_true, yhat, name=""):
-    """For hard yes/no rules that have no probability."""
-    y_true = np.asarray(y_true).astype(int); yhat = np.asarray(yhat).astype(int)
-    tn, fp, fn, tp = confusion_matrix(y_true, yhat, labels=[0, 1]).ravel()
-    return {"model": name, "log_loss": np.nan, "brier": np.nan, "roc_auc": np.nan, "pr_auc": np.nan, "threshold": np.nan,
-            "accuracy": accuracy_score(y_true, yhat), "precision": precision_score(y_true, yhat, zero_division=0),
-            "recall": recall_score(y_true, yhat), "f1": f1_score(y_true, yhat), "cost_per_day": (C_FN * fn + C_FP * fp) / len(y_true)}
-
-def best_cost_threshold(y_true, p):
-    grid = np.round(np.arange(0.05, 0.951, 0.01), 2)
-    costs = [evaluate(y_true, p, t)["cost_per_day"] for t in grid]
-    return float(grid[int(np.argmin(costs))]), grid, np.array(costs)
-
-# %% [markdown]
-# ## 7. Baselines: what a simple rule already achieves
-#
-# The FAQ asks whether the model beats what it would replace. I use four simple references:
-# 1. **Always "No rain"** – the majority class.
-# 2. **Persistence** – "the next rain day will be like today": predict rain if today's Rainfall > 1 mm.
-# 3. **Climatology** – the rain frequency of this station in this month, learned from the training years (a probability).
-# 4. **Humidity rule** – predict rain if 3 pm humidity is above a cut-off. The cut-off is chosen on the training years to minimise cost.
-
-# %%
 tr, va, te = idx["train"], idx["val"], idx["test"]
-base_rows = []
-for part, ii in [("val", va), ("test", te)]:
-    base_rows.append({**evaluate_rule(y[ii], np.zeros(len(ii)), "Always no rain"), "part": part})
-    base_rows.append({**evaluate_rule(y[ii], (data.Rainfall.values[ii] > 1), "Persistence (rain today)"), "part": part})
-
-clim = data.iloc[tr].groupby(["Location", data.Date.dt.month.iloc[tr]])["y_honest"].mean()
-clim_p = lambda ii: np.array([clim.get((l, m), y[tr].mean()) for l, m in zip(data.Location.values[ii], data.Date.dt.month.values[ii])])
-hum = data.Humidity3pm.fillna(prep.median["Humidity3pm"]).values
-cands = np.arange(40, 96, 1)
-hum_cut = cands[np.argmin([evaluate_rule(y[tr], hum[tr] > c)["cost_per_day"] for c in cands])]
-thr_clim, _, _ = best_cost_threshold(y[va], clim_p(va))
-for part, ii in [("val", va), ("test", te)]:
-    base_rows.append({**evaluate(y[ii], clim_p(ii), thr_clim, "Climatology (station x month)"), "part": part})
-    base_rows.append({**evaluate_rule(y[ii], hum[ii] > hum_cut, f"Humidity3pm > {hum_cut}"), "part": part})
-baselines = pd.DataFrame(base_rows)
-print("humidity cut-off chosen on train:", hum_cut)
-baselines[baselines.part == "test"].round(3)
 
 # %% [markdown]
-# Two observations that shape the whole project:
-# - "Always no rain" already has the **highest accuracy**, but it never catches a rain day. Accuracy rewards doing nothing, so it is the wrong objective.
-# - Persistence is **less accurate than doing nothing**. Weather changes, so a naive rule is not enough. This motivates a learned model.
+# ### 3.5 Seven-day input windows for the GRU and the Transformer
+# The sequence models need the readings of days *t−6 … t* for every prediction day. I build the windows on the full calendar
+# table, so a missing day inside a window is filled with the training median (0 after scaling) and marked with a
+# "no record" flag. Two unit tests check that the windows are aligned with the right days.
+
+# %%
+WIN = 7
+
+def build_sequences(frame_all, keep_mask, X_all, pp=prep, win=WIN):
+    """For every row where keep_mask is True, return the last `win` days of scaled features for that station."""
+    frame_all = frame_all.reset_index(drop=True)
+    Z = pp.scaled(X_all)                                           # (n, f) scaled and imputed
+    seqs, rows = [], []
+    for loc, g in frame_all.groupby("Location"):
+        pos = g.index.values
+        day_no = ((g.Date - g.Date.min()).dt.days).values
+        grid = np.zeros((day_no.max() + 1 + win, Z.shape[1] + 1), dtype=np.float32)
+        grid[:, -1] = 1.0                                          # flag = 1 means "no record for this day"
+        grid[day_no + win - 1, :-1] = Z[pos]; grid[day_no + win - 1, -1] = 0.0
+        keep = keep_mask[pos]
+        for p_i, d in zip(pos[keep], day_no[keep]):
+            seqs.append(grid[d: d + win]); rows.append(p_i)
+    order = np.argsort(rows)
+    return np.stack(seqs)[order], np.array(rows)[order]
+
+# sequences need the previous days too, so build them on the full calendar table (all rows, labelled or not)
+Xfull_h = feature_frame(full, "honest")
+labelled = full.y_honest.notna().values
+SEQ, seq_rows = build_sequences(full, labelled, Xfull_h)
+assert np.array_equal(full.index.values[labelled], seq_rows)      # same row order as `data`
+G = {s: [torch.tensor(SEQ[idx[s]]), torch.tensor(prep.loc_ids(data.Location.iloc[idx[s]]))] for s in ["train", "val", "test"]}
+print("sequence tensor:", SEQ.shape)
+# unit test: the last step of every window must be exactly day t, and step t-1 must be the previous calendar day
+assert np.allclose(SEQ[:, -1, :-1], prep.scaled(Xh)), "last step is not day t"
+k = 1000; loc_k, date_k = data.Location.iloc[k], data.Date.iloc[k]
+prev = full[(full.Location == loc_k) & (full.Date == date_k - pd.Timedelta(days=1))]
+if len(prev):
+    assert np.allclose(SEQ[k, -2, :-1], prep.scaled(feature_frame(prev, "honest")[prep.cols])[0])
+print("sequence checks passed")
 
 # %% [markdown]
-# ## 8. Models
+# ## 4. Model implementation
 #
-# I compare five hypothesis spaces (Module 4), from simple to flexible. All five are trained with the same loss
+# Each model is a hypothesis space (Module 4). I compare five hypothesis spaces (Module 4), from simple to flexible. All five are trained with the same loss
 # (binary cross-entropy), so the differences come from the hypothesis space and the input.
 #
 # | Model | Hypothesis space | Why it is in the study |
@@ -487,23 +467,15 @@ baselines[baselines.part == "test"].round(3)
 # | Transformer (deep learning) | self-attention over the last 7 days (Module 4.5: attention as a kernel learned from data) | same history as the GRU, but each day can look at every other day directly |
 
 # %% [markdown]
-# ### 8.1 Logistic Regression
+# ### 4.1 Logistic Regression
 # `lbfgs` solver, L2 penalty with C = 1 (the default). Standardised numbers + one-hot station.
 
 # %%
 def lr_inputs(ii, X=Xh, frame=data, pp=prep):
     return np.hstack([pp.scaled(X.iloc[ii]), pp.onehot(frame.Location.iloc[ii])])
 
-t0 = time.time()
-lr = LogisticRegression(C=1.0, max_iter=3000)
-lr.fit(lr_inputs(tr), y[tr])
-TIMES = {"LogReg_train_s": time.time() - t0}
-P = {"val": {}, "test": {}}
-P["val"]["LogReg"], P["test"]["LogReg"] = lr.predict_proba(lr_inputs(va))[:, 1], lr.predict_proba(lr_inputs(te))[:, 1]
-print("LogReg val log-loss:", round(log_loss(y[va], P["val"]["LogReg"]), 4), "| train time (s):", round(TIMES["LogReg_train_s"], 1))
-
 # %% [markdown]
-# ### 8.2 LightGBM
+# ### 4.2 LightGBM
 # Boosting builds the model one small tree at a time. Each new tree is fitted to the gradient of the log-loss
 # ($\hat p - y$ for each row), which is the same quantity that drives gradient descent in Module 5.
 # I stop adding trees when the validation log-loss has not improved for 100 rounds (early stopping).
@@ -518,29 +490,8 @@ def lgb_frame(X, frame, pp=prep):
     Z["Location"] = pd.Categorical(frame.Location, categories=pp.locs)
     return Z
 
-t0 = time.time()
-gbm = lgb.LGBMClassifier(**LGB_PARAMS)
-gbm.fit(lgb_frame(Xh.iloc[tr], data.iloc[tr]), y[tr],
-        eval_set=[(lgb_frame(Xh.iloc[va], data.iloc[va]), y[va])], eval_metric="binary_logloss",
-        callbacks=[lgb.early_stopping(100, verbose=False)])
-TIMES["LightGBM_train_s"] = time.time() - t0
-BEST_ITER = gbm.best_iteration_
-P["val"]["LightGBM"] = gbm.predict_proba(lgb_frame(Xh.iloc[va], data.iloc[va]))[:, 1]
-P["test"]["LightGBM"] = gbm.predict_proba(lgb_frame(Xh.iloc[te], data.iloc[te]))[:, 1]
-print("best number of trees:", BEST_ITER, "| val log-loss:", round(log_loss(y[va], P["val"]["LightGBM"]), 4),
-      "| train time (s):", round(TIMES["LightGBM_train_s"], 1))
-
 # %% [markdown]
-# Which inputs does LightGBM use most? (gain = total loss reduction from splits on that feature)
-
-# %%
-imp = pd.Series(gbm.booster_.feature_importance("gain"), index=gbm.booster_.feature_name()).sort_values(ascending=False)
-imp = (imp / imp.sum()).round(3)
-print(imp.head(10).to_string())
-RESULTS["lgb_importance_top10"] = imp.head(10).to_dict()
-
-# %% [markdown]
-# ### 8.3 MLP (deep learning, PyTorch)
+# ### 4.3 MLP (deep learning, PyTorch)
 #
 # **Forward pass:** input (standardised numbers, 31 values) + station embedding (8 values) → Linear(39→128) → ReLU → Dropout(0.2)
 # → Linear(128→64) → ReLU → Dropout(0.2) → Linear(64→1) → logit *z*; the probability is $p=\sigma(z)$.
@@ -566,64 +517,8 @@ class MLP(nn.Module):
     def forward(self, x_num, loc):
         return self.net(torch.cat([x_num, self.emb(loc)], dim=1)).squeeze(1)   # logit z
 
-def train_torch(model, train_tensors, val_tensors, y_tr, y_va, lr=1e-3, batch=1024, max_epochs=40, patience=4, seed=SEED):
-    set_seed(seed)
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
-    loss_fn = nn.BCEWithLogitsLoss()
-    ytr_t = torch.tensor(y_tr, dtype=torch.float32)
-    best, best_state, bad, history = np.inf, None, 0, []
-    n = len(y_tr)
-    for epoch in range(max_epochs):
-        model.train(); perm = torch.randperm(n); tot = 0.0
-        for s in range(0, n, batch):
-            b = perm[s:s + batch]
-            opt.zero_grad()
-            loss = loss_fn(model(*[t[b] for t in train_tensors]), ytr_t[b])
-            loss.backward()          # back-propagation: gradients of the loss w.r.t. every weight
-            opt.step()               # Adam update
-            tot += loss.item() * len(b)
-        p_va = predict_torch(model, val_tensors)
-        va_loss = log_loss(y_va, np.clip(p_va, 1e-6, 1 - 1e-6))
-        history.append((epoch + 1, tot / n, va_loss))
-        if va_loss < best - 1e-4:
-            best, bad = va_loss, 0
-            best_state = {k: v.clone() for k, v in model.state_dict().items()}
-        else:
-            bad += 1
-            if bad >= patience:
-                break
-    model.load_state_dict(best_state)
-    return model, pd.DataFrame(history, columns=["epoch", "train_loss", "val_loss"])
-
-@torch.no_grad()
-def predict_torch(model, tensors, batch=8192):
-    model.eval(); out = []
-    for s in range(0, len(tensors[0]), batch):
-        out.append(torch.sigmoid(model(*[t[s:s + batch] for t in tensors])).numpy())
-    return np.concatenate(out)
-
-def mlp_tensors(ii, X=Xh, frame=data, pp=prep):
-    return [torch.tensor(pp.scaled(X.iloc[ii])), torch.tensor(pp.loc_ids(frame.Location.iloc[ii]))]
-
-T_tr, T_va, T_te = mlp_tensors(tr), mlp_tensors(va), mlp_tensors(te)
-SEEDS = [42, 7, 2024]
-mlp_runs, mlp_hist = [], None
-t0 = time.time()
-for sd in SEEDS:
-    set_seed(sd)
-    model, hist = train_torch(MLP(n_num=T_tr[0].shape[1]), T_tr, T_va, y[tr], y[va], seed=sd)
-    mlp_runs.append((model, predict_torch(model, T_va), predict_torch(model, T_te)))
-    mlp_hist = hist if mlp_hist is None else mlp_hist
-    print(f"seed {sd}: stopped after {len(hist)} epochs, best val log-loss {hist.val_loss.min():.4f}")
-TIMES["MLP_train_s_per_seed"] = (time.time() - t0) / len(SEEDS)
-mlp_model = mlp_runs[0][0]
-P["val"]["MLP"], P["test"]["MLP"] = mlp_runs[0][1], mlp_runs[0][2]
-n_params = sum(p.numel() for p in mlp_model.parameters())
-print("MLP parameters:", n_params)
-RESULTS["mlp_params"] = int(n_params)
-
 # %% [markdown]
-# ### 8.4 GRU (deep learning with a 7-day history)
+# ### 4.4 GRU (deep learning with a 7-day history)
 #
 # All models above see only day *t*. A weather system usually builds up over several days, so I test whether the recent
 # history helps. For each prediction day the input is the sequence of the 31 standardised values for days *t−6 … t*
@@ -633,25 +528,6 @@ RESULTS["mlp_params"] = int(n_params)
 # → Linear(72→32) → ReLU → Linear(32→1) → logit. Same loss, optimiser and early stopping as the MLP.
 
 # %%
-WIN = 7
-
-def build_sequences(frame_all, keep_mask, X_all, pp=prep, win=WIN):
-    """For every row where keep_mask is True, return the last `win` days of scaled features for that station."""
-    frame_all = frame_all.reset_index(drop=True)
-    Z = pp.scaled(X_all)                                           # (n, f) scaled and imputed
-    seqs, rows = [], []
-    for loc, g in frame_all.groupby("Location"):
-        pos = g.index.values
-        day_no = ((g.Date - g.Date.min()).dt.days).values
-        grid = np.zeros((day_no.max() + 1 + win, Z.shape[1] + 1), dtype=np.float32)
-        grid[:, -1] = 1.0                                          # flag = 1 means "no record for this day"
-        grid[day_no + win - 1, :-1] = Z[pos]; grid[day_no + win - 1, -1] = 0.0
-        keep = keep_mask[pos]
-        for p_i, d in zip(pos[keep], day_no[keep]):
-            seqs.append(grid[d: d + win]); rows.append(p_i)
-    order = np.argsort(rows)
-    return np.stack(seqs)[order], np.array(rows)[order]
-
 class GRUNet(nn.Module):
     def __init__(self, n_feat, n_loc=N_LOC, emb=8, hidden=64):
         super().__init__()
@@ -662,36 +538,8 @@ class GRUNet(nn.Module):
         _, h = self.gru(seq)                                       # h: (1, batch, hidden) = summary of the 7 days
         return self.head(torch.cat([h[0], self.emb(loc)], dim=1)).squeeze(1)
 
-# sequences need the previous days too, so build them on the full calendar table (all rows, labelled or not)
-Xfull_h = feature_frame(full, "honest")
-labelled = full.y_honest.notna().values
-SEQ, seq_rows = build_sequences(full, labelled, Xfull_h)
-assert np.array_equal(full.index.values[labelled], seq_rows)      # same row order as `data`
-G = {s: [torch.tensor(SEQ[idx[s]]), torch.tensor(prep.loc_ids(data.Location.iloc[idx[s]]))] for s in ["train", "val", "test"]}
-print("sequence tensor:", SEQ.shape)
-# unit test: the last step of every window must be exactly day t, and step t-1 must be the previous calendar day
-assert np.allclose(SEQ[:, -1, :-1], prep.scaled(Xh)), "last step is not day t"
-k = 1000; loc_k, date_k = data.Location.iloc[k], data.Date.iloc[k]
-prev = full[(full.Location == loc_k) & (full.Date == date_k - pd.Timedelta(days=1))]
-if len(prev):
-    assert np.allclose(SEQ[k, -2, :-1], prep.scaled(feature_frame(prev, "honest")[prep.cols])[0])
-print("sequence checks passed")
-
-gru_runs = []
-t0 = time.time()
-for sd in SEEDS:
-    set_seed(sd)
-    model, hist = train_torch(GRUNet(n_feat=SEQ.shape[2]), G["train"], G["val"], y[tr], y[va], seed=sd)
-    gru_runs.append((model, predict_torch(model, G["val"]), predict_torch(model, G["test"])))
-    print(f"seed {sd}: stopped after {len(hist)} epochs, best val log-loss {hist.val_loss.min():.4f}")
-    if sd == SEEDS[0]:
-        gru_hist = hist
-TIMES["GRU_train_s_per_seed"] = (time.time() - t0) / len(SEEDS)
-gru_model = gru_runs[0][0]
-P["val"]["GRU"], P["test"]["GRU"] = gru_runs[0][1], gru_runs[0][2]
-
 # %% [markdown]
-# ### 8.5 Transformer encoder (deep learning with self-attention over 7 days)
+# ### 4.5 Transformer encoder (deep learning with self-attention over 7 days)
 #
 # The GRU reads the 7 days one after another. A Transformer instead lets every day compare itself with every other day in one
 # step. In Module 4.5, the attention matrix $\mathrm{softmax}(QK^\top/\sqrt{d_k})$ was described as a **kernel learned from data**:
@@ -736,6 +584,140 @@ class TransformerNet(nn.Module):
             h = b(h)
         return self.head(torch.cat([h[:, -1], self.emb(loc)], dim=1)).squeeze(1)   # use day t
 
+# %% [markdown]
+# ### 4.6 Shared training loop for the three neural networks
+# One function trains every PyTorch model in the same way, so the comparison is fair:
+# - **Loss:** `BCEWithLogitsLoss` (binary cross-entropy computed from the logit in one numerically safe step).
+# - **Optimiser:** Adam, learning rate 0.001, mini-batches of 1,024 rows, up to 40 epochs.
+# - **Back-propagation:** `loss.backward()` computes the gradient of the loss for every weight; `opt.step()` applies the Adam update.
+# - **Early stopping:** after every epoch the validation log-loss is measured; the best weights are kept, and training stops
+#   after 4 epochs without improvement.
+
+# %%
+def train_torch(model, train_tensors, val_tensors, y_tr, y_va, lr=1e-3, batch=1024, max_epochs=40, patience=4, seed=SEED):
+    set_seed(seed)
+    opt = torch.optim.Adam(model.parameters(), lr=lr)
+    loss_fn = nn.BCEWithLogitsLoss()
+    ytr_t = torch.tensor(y_tr, dtype=torch.float32)
+    best, best_state, bad, history = np.inf, None, 0, []
+    n = len(y_tr)
+    for epoch in range(max_epochs):
+        model.train(); perm = torch.randperm(n); tot = 0.0
+        for s in range(0, n, batch):
+            b = perm[s:s + batch]
+            opt.zero_grad()
+            loss = loss_fn(model(*[t[b] for t in train_tensors]), ytr_t[b])
+            loss.backward()          # back-propagation: gradients of the loss w.r.t. every weight
+            opt.step()               # Adam update
+            tot += loss.item() * len(b)
+        p_va = predict_torch(model, val_tensors)
+        va_loss = log_loss(y_va, np.clip(p_va, 1e-6, 1 - 1e-6))
+        history.append((epoch + 1, tot / n, va_loss))
+        if va_loss < best - 1e-4:
+            best, bad = va_loss, 0
+            best_state = {k: v.clone() for k, v in model.state_dict().items()}
+        else:
+            bad += 1
+            if bad >= patience:
+                break
+    model.load_state_dict(best_state)
+    return model, pd.DataFrame(history, columns=["epoch", "train_loss", "val_loss"])
+
+@torch.no_grad()
+def predict_torch(model, tensors, batch=8192):
+    model.eval(); out = []
+    for s in range(0, len(tensors[0]), batch):
+        out.append(torch.sigmoid(model(*[t[s:s + batch] for t in tensors])).numpy())
+    return np.concatenate(out)
+
+def mlp_tensors(ii, X=Xh, frame=data, pp=prep):
+    return [torch.tensor(pp.scaled(X.iloc[ii])), torch.tensor(pp.loc_ids(frame.Location.iloc[ii]))]
+
+# %% [markdown]
+# ## 5. Model training
+# All models are trained on 2008–2019. The validation years (2020–2021) are used for early stopping only.
+# The three neural networks are trained with three random seeds each (42, 7, 2024) to see how stable they are.
+
+# %% [markdown]
+# ### 5.1 Logistic Regression
+
+# %%
+t0 = time.time()
+lr = LogisticRegression(C=1.0, max_iter=3000)
+lr.fit(lr_inputs(tr), y[tr])
+TIMES = {"LogReg_train_s": time.time() - t0}
+P = {"val": {}, "test": {}}
+P["val"]["LogReg"], P["test"]["LogReg"] = lr.predict_proba(lr_inputs(va))[:, 1], lr.predict_proba(lr_inputs(te))[:, 1]
+print("LogReg val log-loss:", round(log_loss(y[va], P["val"]["LogReg"]), 4), "| train time (s):", round(TIMES["LogReg_train_s"], 1))
+
+# %% [markdown]
+# ### 5.2 LightGBM
+# Trees are added until the validation log-loss has not improved for 100 rounds.
+
+# %%
+t0 = time.time()
+gbm = lgb.LGBMClassifier(**LGB_PARAMS)
+gbm.fit(lgb_frame(Xh.iloc[tr], data.iloc[tr]), y[tr],
+        eval_set=[(lgb_frame(Xh.iloc[va], data.iloc[va]), y[va])], eval_metric="binary_logloss",
+        callbacks=[lgb.early_stopping(100, verbose=False)])
+TIMES["LightGBM_train_s"] = time.time() - t0
+BEST_ITER = gbm.best_iteration_
+P["val"]["LightGBM"] = gbm.predict_proba(lgb_frame(Xh.iloc[va], data.iloc[va]))[:, 1]
+P["test"]["LightGBM"] = gbm.predict_proba(lgb_frame(Xh.iloc[te], data.iloc[te]))[:, 1]
+print("best number of trees:", BEST_ITER, "| val log-loss:", round(log_loss(y[va], P["val"]["LightGBM"]), 4),
+      "| train time (s):", round(TIMES["LightGBM_train_s"], 1))
+
+# %% [markdown]
+# Which inputs does LightGBM use most? (gain = total loss reduction from splits on that feature)
+
+# %%
+imp = pd.Series(gbm.booster_.feature_importance("gain"), index=gbm.booster_.feature_name()).sort_values(ascending=False)
+imp = (imp / imp.sum()).round(3)
+print(imp.head(10).to_string())
+RESULTS["lgb_importance_top10"] = imp.head(10).to_dict()
+
+# %% [markdown]
+# ### 5.3 MLP
+
+# %%
+T_tr, T_va, T_te = mlp_tensors(tr), mlp_tensors(va), mlp_tensors(te)
+SEEDS = [42, 7, 2024]
+mlp_runs, mlp_hist = [], None
+t0 = time.time()
+for sd in SEEDS:
+    set_seed(sd)
+    model, hist = train_torch(MLP(n_num=T_tr[0].shape[1]), T_tr, T_va, y[tr], y[va], seed=sd)
+    mlp_runs.append((model, predict_torch(model, T_va), predict_torch(model, T_te)))
+    mlp_hist = hist if mlp_hist is None else mlp_hist
+    print(f"seed {sd}: stopped after {len(hist)} epochs, best val log-loss {hist.val_loss.min():.4f}")
+TIMES["MLP_train_s_per_seed"] = (time.time() - t0) / len(SEEDS)
+mlp_model = mlp_runs[0][0]
+P["val"]["MLP"], P["test"]["MLP"] = mlp_runs[0][1], mlp_runs[0][2]
+n_params = sum(p.numel() for p in mlp_model.parameters())
+print("MLP parameters:", n_params)
+RESULTS["mlp_params"] = int(n_params)
+
+# %% [markdown]
+# ### 5.4 GRU
+
+# %%
+gru_runs = []
+t0 = time.time()
+for sd in SEEDS:
+    set_seed(sd)
+    model, hist = train_torch(GRUNet(n_feat=SEQ.shape[2]), G["train"], G["val"], y[tr], y[va], seed=sd)
+    gru_runs.append((model, predict_torch(model, G["val"]), predict_torch(model, G["test"])))
+    print(f"seed {sd}: stopped after {len(hist)} epochs, best val log-loss {hist.val_loss.min():.4f}")
+    if sd == SEEDS[0]:
+        gru_hist = hist
+TIMES["GRU_train_s_per_seed"] = (time.time() - t0) / len(SEEDS)
+gru_model = gru_runs[0][0]
+P["val"]["GRU"], P["test"]["GRU"] = gru_runs[0][1], gru_runs[0][2]
+
+# %% [markdown]
+# ### 5.5 Transformer
+
+# %%
 trf_runs = []
 t0 = time.time()
 for sd in SEEDS:
@@ -752,40 +734,7 @@ RESULTS["transformer_params"] = int(sum(p.numel() for p in trf_model.parameters(
 print("Transformer parameters:", RESULTS["transformer_params"])
 
 # %% [markdown]
-# **Which days does the Transformer look at?** For every test row I take the attention weights of the last block from
-# day *t* (the position used for the prediction) to each of the 7 days, and average them. I also compare rainy and dry target days.
-
-# %%
-@torch.no_grad()
-def attention_from_today(model, tensors, batch=8192):
-    model.eval(); out = []
-    for s_ in range(0, len(tensors[0]), batch):
-        model(*[t[s_:s_ + batch] for t in tensors])
-        out.append(model.blocks[-1].last_weights[:, -1, :].numpy())   # row of day t
-    return np.concatenate(out)
-
-att = attention_from_today(trf_model, G["test"])
-att_all, att_rain, att_dry = att.mean(0), att[y[te] == 1].mean(0), att[y[te] == 0].mean(0)
-RESULTS["attention_from_day_t"] = {"all": att_all.round(4).tolist(), "rain": att_rain.round(4).tolist(), "dry": att_dry.round(4).tolist()}
-labels_days = ["t-6", "t-5", "t-4", "t-3", "t-2", "t-1", "t"]
-fig, ax = plt.subplots(figsize=(5.6, 3.0))
-xx = np.arange(7)
-ax.bar(xx - 0.2, att_rain, 0.4, label="target day is rainy", color="tab:blue", alpha=0.8)
-ax.bar(xx + 0.2, att_dry, 0.4, label="target day is dry", color="tab:orange", alpha=0.8)
-ax.axhline(1 / 7, color="k", ls="--", lw=1, label="equal attention (1/7)")
-ax.set_xticks(xx); ax.set_xticklabels(labels_days); ax.set_ylabel("average attention weight"); ax.set_ylim(0, 0.21)
-ax.set_xlabel("day in the input window"); ax.legend(fontsize=8, ncol=3, loc="upper center")
-ax.set_title("Transformer: attention from day t to each day (last block)")
-plt.tight_layout(); plt.savefig("figures/fig10_attention.png"); plt.show()
-print("attention from day t:", dict(zip(labels_days, att_all.round(3))))
-
-# %% [markdown]
-# The attention is almost flat: every day gets between about 0.14 and 0.15, close to the equal share 1/7 = 0.143, and the
-# pattern is nearly the same for rainy and dry target days. In other words, the Transformer mostly takes an average of the
-# week instead of picking out special days. This agrees with the GRU result: for a target two days ahead, the recent history
-# adds little information beyond today's readings.
-
-# %% [markdown]
+# ### 5.6 Learning curves
 # Learning curves of the three neural networks (seed 42). The training loss is measured with dropout switched on,
 # so it can be above the validation loss.
 
@@ -799,13 +748,90 @@ fig.suptitle("Learning curves (dashed line = epoch kept by early stopping)")
 plt.tight_layout(); plt.savefig("figures/fig2_learning_curves.png"); plt.show()
 
 # %% [markdown]
-# ## 9. From probability to decision: loss vs. task objective
+# ## 6. Model evaluation
+
+# %% [markdown]
+# ### 6.1 Metrics and evaluation tools
+#
+# The **training loss** of every model is the binary cross-entropy (log-loss):
+# $L = -[y\log p + (1-y)\log(1-p)]$. From Module 3, minimising it makes *p* close to the true probability
+# of rain (it minimises the KL divergence between the true and the predicted distributions).
+#
+# The **task objective** is different. A user needs a yes/no decision, and a missed rain day costs more than a false alarm.
+# I report:
+# - **log-loss** (the same quantity the models are trained on) and the **Brier score** (probability quality),
+# - **PR-AUC** (average precision), the main ranking metric. With about 22% rainy days it is more informative than ROC-AUC or accuracy,
+# - at a chosen threshold: **recall** (share of rain days caught), **precision**, **F1** and the **expected cost per day**,
+#   with cost 3 for a missed rain day (FN) and 1 for a false alarm (FP). Section 6.3 explains this choice.
+#
+# Accuracy is shown only to demonstrate why it is not useful here.
+
+# %%
+C_FN, C_FP = 3.0, 1.0
+
+def evaluate(y_true, p, thr=0.5, name=""):
+    y_true = np.asarray(y_true).astype(int); p = np.clip(np.asarray(p, dtype=float), 1e-6, 1 - 1e-6)
+    yhat = (p >= thr).astype(int)
+    tn, fp, fn, tp = confusion_matrix(y_true, yhat, labels=[0, 1]).ravel()
+    return {"model": name, "log_loss": log_loss(y_true, p), "brier": brier_score_loss(y_true, p),
+            "roc_auc": roc_auc_score(y_true, p), "pr_auc": average_precision_score(y_true, p),
+            "threshold": thr, "accuracy": accuracy_score(y_true, yhat), "precision": precision_score(y_true, yhat, zero_division=0),
+            "recall": recall_score(y_true, yhat), "f1": f1_score(y_true, yhat), "cost_per_day": (C_FN * fn + C_FP * fp) / len(y_true)}
+
+def evaluate_rule(y_true, yhat, name=""):
+    """For hard yes/no rules that have no probability."""
+    y_true = np.asarray(y_true).astype(int); yhat = np.asarray(yhat).astype(int)
+    tn, fp, fn, tp = confusion_matrix(y_true, yhat, labels=[0, 1]).ravel()
+    return {"model": name, "log_loss": np.nan, "brier": np.nan, "roc_auc": np.nan, "pr_auc": np.nan, "threshold": np.nan,
+            "accuracy": accuracy_score(y_true, yhat), "precision": precision_score(y_true, yhat, zero_division=0),
+            "recall": recall_score(y_true, yhat), "f1": f1_score(y_true, yhat), "cost_per_day": (C_FN * fn + C_FP * fp) / len(y_true)}
+
+def best_cost_threshold(y_true, p):
+    grid = np.round(np.arange(0.05, 0.951, 0.01), 2)
+    costs = [evaluate(y_true, p, t)["cost_per_day"] for t in grid]
+    return float(grid[int(np.argmin(costs))]), grid, np.array(costs)
+
+# %% [markdown]
+# ### 6.2 Baselines: what a simple rule already achieves
+#
+# The FAQ asks whether the model beats what it would replace. I use four simple references:
+# 1. **Always "No rain"** – the majority class.
+# 2. **Persistence** – "the next rain day will be like today": predict rain if today's Rainfall > 1 mm.
+# 3. **Climatology** – the rain frequency of this station in this month, learned from the training years (a probability).
+# 4. **Humidity rule** – predict rain if 3 pm humidity is above a cut-off. The cut-off is chosen on the training years to minimise cost.
+
+# %%
+base_rows = []
+for part, ii in [("val", va), ("test", te)]:
+    base_rows.append({**evaluate_rule(y[ii], np.zeros(len(ii)), "Always no rain"), "part": part})
+    base_rows.append({**evaluate_rule(y[ii], (data.Rainfall.values[ii] > 1), "Persistence (rain today)"), "part": part})
+
+clim = data.iloc[tr].groupby(["Location", data.Date.dt.month.iloc[tr]])["y_honest"].mean()
+clim_p = lambda ii: np.array([clim.get((l, m), y[tr].mean()) for l, m in zip(data.Location.values[ii], data.Date.dt.month.values[ii])])
+hum = data.Humidity3pm.fillna(prep.median["Humidity3pm"]).values
+cands = np.arange(40, 96, 1)
+hum_cut = cands[np.argmin([evaluate_rule(y[tr], hum[tr] > c)["cost_per_day"] for c in cands])]
+thr_clim, _, _ = best_cost_threshold(y[va], clim_p(va))
+for part, ii in [("val", va), ("test", te)]:
+    base_rows.append({**evaluate(y[ii], clim_p(ii), thr_clim, "Climatology (station x month)"), "part": part})
+    base_rows.append({**evaluate_rule(y[ii], hum[ii] > hum_cut, f"Humidity3pm > {hum_cut}"), "part": part})
+baselines = pd.DataFrame(base_rows)
+print("humidity cut-off chosen on train:", hum_cut)
+baselines[baselines.part == "test"].round(3)
+
+# %% [markdown]
+# Two observations that shape the whole project:
+# - "Always no rain" already has the **highest accuracy**, but it never catches a rain day. Accuracy rewards doing nothing, so it is the wrong objective.
+# - Persistence is **less accurate than doing nothing**. Weather changes, so a naive rule is not enough. This motivates a learned model.
+
+# %% [markdown]
+# ### 6.3 From probability to decision: loss vs. task objective
 #
 # **What the models optimise.** Cross-entropy only asks for good probabilities. It does not know about thresholds or costs.
 #
 # **What the user needs.** A yes/no decision where a missed rain day (an outdoor event without cover, washing left outside,
 # a concrete pour that gets rained on) costs more than an unnecessary precaution. I set the cost ratio FN : FP = 3 : 1.
-# This is an assumption about the user, and Section 10.5 shows how the decision changes with other ratios.
+# This is an assumption about the user, and Section 6.7 shows how the decision changes with other ratios.
 #
 # **Why not train on the cost directly?** The cost counts errors after a hard threshold, so it is a step function of the
 # model output. Its gradient is zero almost everywhere, so gradient descent cannot use it (Module 3: a criterion that includes
@@ -843,7 +869,7 @@ ax.set_title("Calibration on test years"); ax.legend(fontsize=8)
 plt.tight_layout(); plt.savefig("figures/fig4_calibration.png"); plt.show()
 
 # %% [markdown]
-# ### 9.1 Main results on the test years (2022 – Jan 2026)
+# ### 6.4 Main results on the test years (2022 – Jan 2026)
 # Every model uses its own cost-optimal threshold from the validation years. The test set was not used for any choice.
 
 # %%
@@ -865,7 +891,6 @@ main.round(3)
 #   Logistic Regression is clearly weaker (PR-AUC 0.42), so a linear boundary is not enough.
 # - With the default threshold 0.5, LightGBM has the highest accuracy of all models, but it catches only about 22% of the rain days.
 #   The cost-based threshold (0.21) catches about 72%. The threshold matters as much as the model.
-
 
 # %% [markdown]
 # Seed variation of the neural networks (3 seeds, test years, mean ± std):
@@ -892,7 +917,7 @@ ax.set_title("Precision–recall curves, test years")
 plt.tight_layout(); plt.savefig("figures/fig5_pr_curves.png"); plt.show()
 
 # %% [markdown]
-# ### 9.2 How big is the timing leak? The same pipeline on the "standard" Kaggle task
+# ### 6.5 How big is the timing leak? The same pipeline on the "standard" Kaggle task
 # I repeat the LightGBM pipeline with (a) the standard label `RainTomorrow` and all columns of day *t*, and
 # (b) the same plus `RISK_MM`. Everything else (years, parameters, early stopping) is unchanged.
 
@@ -928,11 +953,45 @@ gap.round(3)
 # Adding `RISK_MM` gives a perfect score, which is the clearest sign of a leak: a perfect score on real weather is not believable.
 # Many public results for this dataset are therefore measured on an easier question than the one they describe.
 
+# %% [markdown]
+# ### 6.6 Which days does the Transformer look at?
+# For every test row I take the attention weights of the last block from
+# day *t* (the position used for the prediction) to each of the 7 days, and average them. I also compare rainy and dry target days.
+
+# %%
+@torch.no_grad()
+def attention_from_today(model, tensors, batch=8192):
+    model.eval(); out = []
+    for s_ in range(0, len(tensors[0]), batch):
+        model(*[t[s_:s_ + batch] for t in tensors])
+        out.append(model.blocks[-1].last_weights[:, -1, :].numpy())   # row of day t
+    return np.concatenate(out)
+
+att = attention_from_today(trf_model, G["test"])
+att_all, att_rain, att_dry = att.mean(0), att[y[te] == 1].mean(0), att[y[te] == 0].mean(0)
+RESULTS["attention_from_day_t"] = {"all": att_all.round(4).tolist(), "rain": att_rain.round(4).tolist(), "dry": att_dry.round(4).tolist()}
+labels_days = ["t-6", "t-5", "t-4", "t-3", "t-2", "t-1", "t"]
+fig, ax = plt.subplots(figsize=(5.6, 3.0))
+xx = np.arange(7)
+ax.bar(xx - 0.2, att_rain, 0.4, label="target day is rainy", color="tab:blue", alpha=0.8)
+ax.bar(xx + 0.2, att_dry, 0.4, label="target day is dry", color="tab:orange", alpha=0.8)
+ax.axhline(1 / 7, color="k", ls="--", lw=1, label="equal attention (1/7)")
+ax.set_xticks(xx); ax.set_xticklabels(labels_days); ax.set_ylabel("average attention weight"); ax.set_ylim(0, 0.21)
+ax.set_xlabel("day in the input window"); ax.legend(fontsize=8, ncol=3, loc="upper center")
+ax.set_title("Transformer: attention from day t to each day (last block)")
+plt.tight_layout(); plt.savefig("figures/fig10_attention.png"); plt.show()
+print("attention from day t:", dict(zip(labels_days, att_all.round(3))))
 
 # %% [markdown]
-# ## 10. Reliability
+# The attention is almost flat: every day gets between about 0.14 and 0.15, close to the equal share 1/7 = 0.143, and the
+# pattern is nearly the same for rainy and dry target days. In other words, the Transformer mostly takes an average of the
+# week instead of picking out special days. This agrees with the GRU result: for a target two days ahead, the recent history
+# adds little information beyond today's readings.
+
+# %% [markdown]
+# ### 6.7 Reliability
 #
-# ### 10.1 Random split vs. time split
+# **(a) Random split vs. time split.**
 # A random split puts neighbouring days (almost the same weather) into both train and test. I measure how much this
 # changes the score for the same LightGBM settings: 80/20 random split of 2008–2021 vs. the time split.
 
@@ -952,11 +1011,10 @@ print(RESULTS["random_vs_time"])
 # Here the optimism is small (about 2%), because the target is two days ahead and neighbouring rows are only weakly
 # related. Still, the random split gives a number that the model cannot deliver in use, so I report the time-split result.
 
-
 # %% [markdown]
-# ### 10.2 Year-by-year evaluation (rolling origin)
+# **(b) Year-by-year evaluation (rolling origin).**
 # One test period gives one number. To see the spread, I train on all years before year *Y* and test on year *Y*,
-# for *Y* = 2020 … 2025 (six folds). The threshold is the one chosen in Section 9.
+# for *Y* = 2020 … 2025 (six folds). The threshold is the one chosen in Section 6.3.
 
 # %%
 roll = []
@@ -990,7 +1048,7 @@ summary_roll
 # (28% rain days, a La Niña year) and was the easiest year; dry years such as 2023–2024 are harder.
 
 # %% [markdown]
-# ### 10.3 Stations the model has never seen
+# **(c) Stations the model has never seen.**
 # Could the model serve a **new** weather station? I use GroupKFold with 5 folds over stations: the model is trained on the
 # training years of about 39 stations and tested on the test years of the other ~10. The station feature is removed
 # (an unknown station has no embedding or category). I compare with the same model tested on known stations.
@@ -1018,9 +1076,8 @@ print(RESULTS["unseen_stations"])
 # much larger (± 0.05 instead of ± 0.01). The model can be used for a new station, but its quality is less predictable,
 # so a new station should be monitored for some months before its forecasts are trusted.
 
-
 # %% [markdown]
-# ### 10.4 Where does the model fail?
+# **(d) Where does the model fail?**
 # **(a) By station.** Aggregate scores can hide stations where the model is weak.
 
 # %%
@@ -1044,7 +1101,6 @@ print(per_loc.head(5).round(3)); print(per_loc.tail(5).round(3))
 # isolated storms. The strongest are the wet coastal stations in south-west Western Australia and western Victoria
 # (Witchcliffe, Walpole, Portland, Mount Gambier) and Darwin, where rain comes with large, regular weather systems.
 # Sale (Victoria) is an outlier: normal rain frequency but low recall, so it would need its own check.
-
 
 # %% [markdown]
 # **(b) By the amount of rain.** The label treats 1.2 mm and 40 mm the same ("Yes"). Cross-entropy therefore gives
@@ -1087,7 +1143,7 @@ ax.set_title(f"Confusion matrix (thr = {THR[best_name]:.2f})"); ax.grid(False)
 plt.tight_layout(); plt.savefig("figures/fig9_confusion.png"); plt.show()
 
 # %% [markdown]
-# ### 10.5 Sensitivity to my own design choices
+# **(e) Sensitivity to my own design choices.**
 # I change one choice at a time (LightGBM, validation → test) and check whether the conclusions stay the same.
 # 1. **Missing flags removed** – does keeping "missingness" help?
 # 2. **Class weights** (`scale_pos_weight` = 3) or **resampling** (keep only one in three no-rain days in the training data)
@@ -1140,9 +1196,8 @@ sens.round(3)
 # - The cost ratio controls the trade-off directly: a ratio of 5:1 catches about 86% of rain days with more false alarms,
 #   a ratio of 2:1 catches about 52% with fewer. The chosen thresholds are close to the theory value 1/(1+ratio).
 
-
 # %% [markdown]
-# ## 11. Deployment test: real 2026 data from BOM
+# ### 6.8 Deployment test: real 2026 data from BOM
 #
 # The models were trained on 2008–2019. Now I download the newest BOM files (January–September 2026) for five capital
 # cities, build exactly the same inputs, and predict every day from 1 February to 31 August 2026.
@@ -1237,9 +1292,8 @@ dep_tab.round(3)
 # (PR-AUC 0.54), which suggests no strong drift yet. Canberra is the weakest city: it is the driest of the five
 # (17% rain days). Melbourne is second weakest; its 2026 BOM file has no cloud readings, so the model relies on the missing flags there.
 
-
 # %% [markdown]
-# ## 12. Cost of training and prediction (feasibility)
+# ### 6.9 Cost of training and prediction (feasibility)
 # Measured on the machine that ran this notebook. Prediction latency is the time for one station-day.
 
 # %%
@@ -1258,7 +1312,14 @@ RESULTS["latency_ms"] = {k: round(v, 2) for k, v in lat.items()}
 print("training time (s):", RESULTS["times_s"]); print("latency per station-day (ms):", RESULTS["latency_ms"])
 
 # %% [markdown]
-# ## 13. Summary
+# ## 7. Conclusion
+# - The public `RainTomorrow` task uses information that is not available at prediction time. With the same pipeline it gives
+#   PR-AUC about 0.77, while the time-safe task gives about 0.51. The task definition matters more than the model choice.
+# - On the time-safe task, LightGBM and the MLP are the best models. With a cost-based threshold they catch about 72% of rain days
+#   and clearly beat every simple rule.
+# - Seven days of history (GRU, Transformer) do not help; the Transformer's attention is almost flat over the week.
+# - The results hold across six test years, with some loss on unseen stations, and on new 2026 BOM data.
+#
 # The key numbers are saved to `results/results.json` and used in the journal.
 
 # %%
