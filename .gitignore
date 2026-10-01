@@ -5,3 +5,5 @@ __pycache__/
 .ipynb_checkpoints/
 old_versions/
 .DS_Store
+*.log
+rain_forecast_au.py

@@ -16,10 +16,10 @@ The notebook downloads its data from the original sources and uses the copies in
 | Path | What it is |
 |---|---|
 | `rain_forecast_au.ipynb` | Full implementation with outputs |
-| `rain_forecast_au.py` | The same notebook as a plain Python script (jupytext percent format) |
 | `data/weatherAUS.csv` | Snapshot of the rattle weatherAUS file (Bureau of Meteorology data, to 30 Jan 2026) |
 | `data/bom_*.csv` | BOM Daily Weather Observations, Jan–Sep 2026, five cities |
 | `figures/`, `results/` | Figures and numbers used in the journal |
+| `results/history_seq_cache.json` | Saved results of the 30- and 90-day GRU/Transformer runs (loaded on Colab so they are not trained again) |
 | `requirements.txt` | Library versions used to produce the results |
 
 ## Data sources
